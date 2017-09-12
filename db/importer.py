@@ -16,15 +16,15 @@ def main():
     '''\
     %prog [options] <folder>
     '''
-    mongodb_helper.drop_db()
-    import_yelp_data()
-    imoprt_vectors()
-    #TODO build indexs
+#   mongodb_helper.drop_db()
+#   import_yelp_data()
+#   imoprt_vectors()
+    indexing()
     return 0
 
 def import_yelp_data():
     colls = [
-        (settings.BUSSINESS_COLL, settings.BUSSINESS_FILE),
+        (settings.BUSINESS_COLL, settings.BUSINESS_FILE),
         (settings.USER_COLL, settings.USER_FILE),
         (settings.REVIEW_COLL, settings.REVIEW_FILE),
         (settings.TIP_COLL, settings.TIP_FILE),
@@ -63,7 +63,7 @@ def load_vectors(k=1000):
             seq2id[int(seq)] = id_
 
     type2fpath = [
-        (settings.BUSSINESS_COLL, settings.BUSSINESS_FILE, 'business_id'),
+        (settings.BUSINESS_COLL, settings.BUSSINESS_FILE, 'business_id'),
         (settings.USER_COLL, settings.USER_FILE, 'user_id'),
     ]
     #TODO refactor
@@ -108,6 +108,14 @@ def load_vectors(k=1000):
                 sub_vectors = []
         if len(sub_vectors) > 0:
             yield sub_vectors
+
+def indexing():
+    business_coll = mongodb_helper.get_coll(settings.BUSINESS_COLL)
+    business_coll.create_index("business_id")
+
+    vector_coll = mongodb_helper.get_coll(settings.VECTOR_COLL)
+    vector_coll.create_index("id")
+    vector_coll.create_index("type")
 
 
 if __name__ == '__main__':
