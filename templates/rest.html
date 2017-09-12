@@ -1,0 +1,21 @@
+<font size="6">Basic Information</font><br>
+
+{{ rest_info.name }}, Stars:{{ rest_info.stars }}<br>
+{{ rest_info.address }}, {{ rest_info.city }}<br>
+Categories:{{ rest_info.categories }}<br>
+Latitude: {{ rest_info.latitude }}, Longitude: {{ rest_info.longitude }}<br>
+<br>
+
+<font size="6">KNN by euclidean distance</font><br>
+{% for r in knn_infos %}
+    {{ forloop.counter0 }}. <a href="/{{ r.business_id }}/">{{ r.name }}</a><br>
+{% endfor %}<br>
+
+<font size="5">Category distribution</font><br>
+{% for c in knn_cat_dist %}
+    {% if c.2 %}
+        <font color="red">{{ c.0 }} ({{ c.1 }})</font><br>
+    {% else %}
+        {{ c.0 }} ({{ c.1 }})<br>
+    {% endif %}
+{% endfor %}

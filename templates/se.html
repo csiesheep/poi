@@ -1,0 +1,15 @@
+<form action="/">
+  <fieldset>
+    Search: <input type="text" name="q">
+    <input type="submit" value="Submit">
+  </fieldset>
+</form>
+
+{% if rests %}
+{% for r in rests %}
+<a href="/{{ r.business_id.0 }}/">{{ r.name.0 }}</a> Stars:{{ r.stars.0 }}<br>
+{{ r.address.0 }}, {{ r.city.0 }}<br>
+Categories:{{ r.categories }}<br>
+<br>
+{% endfor %}
+{% endif %}
