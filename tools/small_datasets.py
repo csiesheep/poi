@@ -73,6 +73,18 @@ def sample_businesses(output_folder, k):
     return selected_ids
 
 def sample_yelp_others(bids, output_folder):
+    checkin_fname = os.path.basename(settings.CHECKIN_FILE)
+    count = 0
+    with open(os.path.join(output_folder, checkin_fname), 'w') as fo:
+        with open(settings.CHECKIN_FILE) as f:
+            for line in f:
+                checkin = json.loads(line.strip())
+                if checkin['business_id'] not in bids:
+                    continue
+                fo.write(line)
+                count += 1
+    print 'checkin count:', count
+
     user_ids = set()
     review_fname = os.path.basename(settings.REVIEW_FILE)
     count = 0
