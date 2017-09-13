@@ -30,6 +30,10 @@ def by_inner_product(id_, k=10):
     pass
 
 #TODO
+def by_sigmoid_inner_product(id_, k=10):
+    pass
+
+#TODO
 def by_cosine(id_, k=10):
     pass
 
