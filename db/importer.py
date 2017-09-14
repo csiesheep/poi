@@ -63,7 +63,7 @@ def load_vectors(k=1000):
             seq2id[int(seq)] = id_
 
     type2fpath = [
-        (settings.BUSINESS_COLL, settings.BUSSINESS_FILE, 'business_id'),
+        (settings.BUSINESS_COLL, settings.BUSINESS_FILE, 'business_id'),
         (settings.USER_COLL, settings.USER_FILE, 'user_id'),
     ]
     #TODO refactor
