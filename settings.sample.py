@@ -15,6 +15,7 @@ CHECKIN_COLL = 'checkin'
 VECTOR_COLL = 'vector'
 
 BUSINESS_FILE = 'res/small_dataset/yelp_academic_dataset_business.json'
+BUSINESS_FILE = 'res/small_dataset/yelp_academic_dataset_business_for_indexing.json'
 USER_FILE = 'res/small_dataset/yelp_academic_dataset_user.json'
 REVIEW_FILE = 'res/small_dataset/yelp_academic_dataset_review.json'
 TIP_FILE = 'res/small_dataset/yelp_academic_dataset_tip.json'
