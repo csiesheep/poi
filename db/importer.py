@@ -16,9 +16,9 @@ def main():
     '''\
     %prog [options] <folder>
     '''
-#   mongodb_helper.drop_db()
-#   import_yelp_data()
-#   imoprt_vectors()
+    mongodb_helper.drop_db()
+    import_yelp_data()
+    imoprt_vectors()
     indexing()
     return 0
 
