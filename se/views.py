@@ -13,7 +13,7 @@ __author__ = 'sheep'
 
 
 def search(request):
-    results = []
+    filtered = []
     if 'q' in request.GET:
         solr = pysolr.Solr('http://localhost:8983/solr/gettingstarted/',
                            timeout=10)
@@ -21,7 +21,6 @@ def search(request):
         results = solr.search(keywords)
 
         vector_coll = mongodb_helper.get_coll(settings.VECTOR_COLL)
-        filtered = []
         for r in results:
             if vector_coll.find_one({'id': r['business_id'][0]}) is not None:
                 filtered.append(r)
