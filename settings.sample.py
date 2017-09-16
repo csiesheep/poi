@@ -23,3 +23,8 @@ CHECKIN_FILE = 'res/small_dataset/yelp_academic_dataset_checkin.json'
 
 SEQ2ID_FILE = 'res/small_dataset/yelp_id_names.txt'
 SEQ2VEC_FILE = 'res/small_dataset/yelp_id_vectors.txt'
+
+BUSINESS_CLASS = 'B'
+USER_CLASS = 'U'
+CITY_CLASS = 'C'
+CATEGORY_CLASS = 'L'

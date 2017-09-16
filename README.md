@@ -28,25 +28,35 @@
     $cp settings.sample.py settings.py
 
 
-3. Prepare datasets
+3. Setup PYTHONPATH
+
+    In the repository folder
+    For linux
+    $export PYTHONPATH=`pwd`
+
+    For window
+    $SET PYTHONPATH='<repository folder>'
+
+
+4. Prepare datasets
 
     * For implementation, you could skip this step
 
-    2.1 Prepare yelp datasets and update settings.py
+    3.1 Prepare yelp datasets and update settings.py
 
         Donwload yelp datasets from https://www.yelp.com/dataset/download
         Update settings.py
         
             BUSINESS_FILE, USER_FILE, REVIEW_FILE, TIP_FILE, CHECKIN_FILE
 
-    2.1 Prepare vector files and update settings.py
+    3.2 Prepare vector files and update settings.py
 
         Ask for vector files
         Update settings.py
 
             SEQ2ID_FILE, SEQ2VEC_FILE
 
-    2.3 Prepare files for search engine
+    3.3 Prepare files for search engine
 
         Update indexing file name in setting.py
 
@@ -55,17 +65,17 @@
         $python tools/prepare_dataset_for_indexing.py
 
 
-3. Build up the database
+5. Build up the database
 
     $python db/importer.py
 
 
-4. Build up the search engine
+6. Build up the search engine
 
     $<solr folder>/bin/post -c gettingstarted <INDEXING_FILE in settings.py>
 
 
-5. Start django server
+7. Start django server
 
     5.1 Update your ip to ALLOWED_HOSTS in rec/settings.py
 
