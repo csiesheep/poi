@@ -33,7 +33,18 @@ def detail(request, rest_id):
     vector_coll = mongodb_helper.get_coll(settings.VECTOR_COLL)
     rest_vec = vector_coll.find_one({'id': rest_id})
 
-    knn_ids = [id_ for _, id_ in knn.by_euclidean_distance(rest_id)]
+    similarity_types = [['euclidean', 'Euclidean distance', False],
+                        ['manhattan', 'Manhattan distance', False],
+                        ['inner', 'Inner product', False],
+                        ['sigmoid', 'Sigmoid of inner product', False],
+                        ['cosine', 'Cosine', False]]
+    selected_sim_type = request.GET.get('similarity', 'euclidean')
+    for s in similarity_types:
+        if s[0] == selected_sim_type:
+            s[2] = True
+            break
+
+    knn_ids = [id_ for _, id_ in knn.get_knn(selected_sim_type, rest_id)]
     knn_infos = [business_coll.find_one({'business_id': id_})
                  for id_ in knn_ids]
 
@@ -53,7 +64,8 @@ def detail(request, rest_id):
             continue
         knn_city_dist.append((c, score, False))
     return render(request, 'rest.html', {'rest_info': rest_info,
-                                         'rest_vec': rest_vec,
-                                         'knn_infos': knn_infos,
-                                         'knn_cat_dist': knn_cat_dist,
-                                         'knn_city_dist': knn_city_dist})
+                                      'rest_vec': rest_vec,
+                                      'similarity_types': similarity_types,
+                                      'knn_infos': knn_infos,
+                                      'knn_cat_dist': knn_cat_dist,
+                                      'knn_city_dist': knn_city_dist})
