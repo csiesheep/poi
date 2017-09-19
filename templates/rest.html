@@ -77,16 +77,14 @@
 
 <h2>KNN top 10 similar businesses</h2>
 
- <div class="dropdown">
-  <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Similarity function
-  <span class="caret"></span></button>
-  <ul class="dropdown-menu">
-    <li><a href="#">Euclidean distance</a></li>
-    <li><a href="#">Cosine</a></li>
-    <li><a href="#">Inner product</a></li>
-  </ul>
-</div> 
+<form method="GET" action="/{{ rest_info.business_id }}/" target="_blank">
+  {% for s in similarity_types %}
+    <input type="radio" name="similarity" value="{{ s.0 }}" {% if s.2 %}checked{% endif %}> {{s.1}}
+  {% endfor %}
+  <input type="submit" value="Submit">
+</form>
 
+<font size="6">KNN</font><br>
 {% for r in knn_infos %}
     {{ forloop.counter0 }}. <a href="/{{ r.business_id }}/">{{ r.name }}</a><br>
 {% endfor %}<br>
@@ -153,3 +151,13 @@
     <script src="{% static "poi/sb-admin-2.js" %}"></script>
 
 </body>
+<br>
+
+<font size="5">City distribution</font><br>
+{% for c in knn_city_dist %}
+    {% if c.2 %}
+        <font color="red">{{ c.0 }} ({{ c.1 }})</font><br>
+    {% else %}
+        {{ c.0 }} ({{ c.1 }})<br>
+    {% endif %}
+{% endfor %}
