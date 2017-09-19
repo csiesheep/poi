@@ -19,3 +19,13 @@ Latitude: {{ rest_info.latitude }}, Longitude: {{ rest_info.longitude }}<br>
         {{ c.0 }} ({{ c.1 }})<br>
     {% endif %}
 {% endfor %}
+<br>
+
+<font size="5">City distribution</font><br>
+{% for c in knn_city_dist %}
+    {% if c.2 %}
+        <font color="red">{{ c.0 }} ({{ c.1 }})</font><br>
+    {% else %}
+        {{ c.0 }} ({{ c.1 }})<br>
+    {% endif %}
+{% endfor %}

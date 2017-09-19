@@ -36,6 +36,7 @@ def detail(request, rest_id):
     knn_ids = [id_ for _, id_ in knn.by_euclidean_distance(rest_id)]
     knn_infos = [business_coll.find_one({'business_id': id_})
                  for id_ in knn_ids]
+
     categories = rest_info['categories']
     knn_cat_dist = []
     for cat, score in distribution.category_distribution(knn_ids):
@@ -43,7 +44,16 @@ def detail(request, rest_id):
             knn_cat_dist.append((cat, score, True))
             continue
         knn_cat_dist.append((cat, score, False))
+
+    city = rest_info['city']
+    knn_city_dist = []
+    for c, score in distribution.city_distribution(knn_ids):
+        if c == city:
+            knn_city_dist.append((c, score, True))
+            continue
+        knn_city_dist.append((c, score, False))
     return render(request, 'rest.html', {'rest_info': rest_info,
                                          'rest_vec': rest_vec,
                                          'knn_infos': knn_infos,
-                                         'knn_cat_dist': knn_cat_dist})
+                                         'knn_cat_dist': knn_cat_dist,
+                                         'knn_city_dist': knn_city_dist})

@@ -23,9 +23,19 @@ def category_distribution(ids):
             cat_dist[cat] += 1.0/len(ids)
     return sorted(cat_dist.items(), key=lambda x:x[1], reverse=True)
 
-#TODO
 def city_distribution(ids):
-    pass
+    business_coll = mongodb_helper.get_coll(settings.BUSINESS_COLL)
+    city_dist = {}
+    for id_ in ids:
+        city = business_coll.find_one({'business_id': id_})['city']
+        if city is None:
+            continue
+
+        if city not in city_dist:
+            city_dist[city] = 1.0/len(ids)
+            continue
+        city_dist[city] += 1.0/len(ids)
+    return sorted(city_dist.items(), key=lambda x:x[1], reverse=True)
 
 #TODO
 def keyword_distribution(ids):
