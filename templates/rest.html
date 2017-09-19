@@ -84,7 +84,6 @@
   <input type="submit" value="Submit">
 </form>
 
-<font size="6">KNN</font><br>
 {% for r in knn_infos %}
     {{ forloop.counter0 }}. <a href="/{{ r.business_id }}/">{{ r.name }}</a><br>
 {% endfor %}<br>
