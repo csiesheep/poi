@@ -1,15 +1,138 @@
-<form action="/">
-  <fieldset>
-    Search: <input type="text" name="q">
-    <input type="submit" value="Submit">
-  </fieldset>
-</form>
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
 
-{% if rests %}
-{% for r in rests %}
-<a href="/{{ r.business_id.0 }}/">{{ r.name.0 }}</a> Stars:{{ r.stars.0 }}<br>
-{{ r.address.0 }}, {{ r.city.0 }}<br>
-Categories:{{ r.categories }}<br>
-<br>
-{% endfor %}
-{% endif %}
+<head>
+	<!-- Bootstrap Core CSS -->
+    <link href="{% static "poi/bootstrap.min.css" %}" rel="stylesheet">
+    
+    <!-- MetisMenu CSS -->
+    <link href="{% static "poi/metisMenu.min.css" %}" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="{% static "poi/sb-admin-2.css" %}" rel="stylesheet">
+    
+    <!-- Morris Charts CSS -->
+    <link href="{% static "poi/morris.css" %}" rel="stylesheet">
+    
+    <!-- Custom Fonts -->
+    <link href="{% static "poi/font-awesome.min.css" %}" rel="stylesheet" type="text/css">
+
+    <script src="{% static "poi/jquery.min.js" %}"></script>
+
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap.tagsinput/0.4.2/bootstrap-tagsinput.css" />
+	<script src="//cdn.jsdelivr.net/bootstrap.tagsinput/0.4.2/bootstrap-tagsinput.min.js"></script>
+
+
+	<style type="text/css">
+	.bootstrap-tagsinput {
+	    width: 100%;
+	}
+	.label {
+	    line-height: 2 !important;
+	}
+	</style>
+
+</head>
+
+<body>
+
+ <div id="wrapper">
+ 
+ <!-- Navigation -->
+        <!-- Navigation -->
+        <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="se.html">iPDA Yelp Demo</a>
+            </div>
+            <!-- /.navbar-header -->
+
+            <div class="navbar-default sidebar" role="navigation">
+                <div class="sidebar-nav navbar-collapse">
+                    <ul class="nav" id="side-menu">
+                        <li>
+                            <a href="index.html">Search</a>
+                        </li>
+                        <li>
+                            <a href="index.html">Others</a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- /.sidebar-collapse -->
+            </div>
+            <!-- /.navbar-static-side -->
+        </nav>
+        
+        <div id="page-wrapper">
+        	<div class="row">
+		<h1></h1>
+            	<div class="col-lg-12">
+        	
+		    <div class="input-group custom-search-form">
+		    <form action="/">
+		      <fieldset>
+		        <input type="text" name="q" class="form-control">
+		        <input type="submit" value="Submit" class="btn btn-default">
+		      </fieldset>
+		    </form>
+		    </div>
+
+<!--
+
+		<div class="input-group stylish-input-group">
+		<form action="/">
+                    <input type="text" name = "q" class="form-control"  placeholder="Search" >
+                    <span class="input-group-addon">
+                        <button type="submit">
+                            <span class="glyphicon glyphicon-search"></span>
+                        </button>  
+                    </span>
+		</form>
+                </div>
+-->
+
+		</div>
+
+		<div class="col-lg-12">
+            
+		    {% if rests %}
+		    {% for r in rests %}
+		    <h3><a href="/{{ r.business_id.0 }}/">{{ r.name.0 }}</a></h3> 
+		    <b>Stars:</b> {{ r.stars.0 }}<br>
+		    <b>Address:</b> {{ r.address.0 }}, {{ r.city.0 }}<br>
+		    <b>Categories:</b> <input type="text" value="{{ r.categories|join:', ' }}" data-role="tagsinput" class="form-control" />
+		    <br>
+		    {% endfor %}
+		    {% endif %}
+
+		
+		
+            
+            	</div>
+        
+        	</div>
+
+		</div>
+
+</div>
+
+    <!-- jQuery -->
+    <script src="{% static "poi/jquery.min.js" %}"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="{% static "poi/bootstrap.min.js" %}"></script>
+
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="{% static "poi/metisMenu.min.js" %}"></script>
+
+    <!-- Morris Charts JavaScript -->
+    <script src="{% static "poi/raphael.min.js" %}"></script>
+    <script src="{% static "poi/morris.min.js" %}"></script>
+    <script src="{% static "poi/morris-data.js" %}"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <script src="{% static "poi/sb-admin-2.js" %}"></script>
+
+</body>
+
+</html>

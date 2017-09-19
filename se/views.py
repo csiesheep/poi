@@ -8,6 +8,10 @@ from se.similarity import knn
 import settings
 from se.statistics import distribution
 
+# for plotting graphs
+from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
+import plotly.graph_objs as go
+
 
 __author__ = 'sheep'
 
@@ -43,7 +47,22 @@ def detail(request, rest_id):
             knn_cat_dist.append((cat, score, True))
             continue
         knn_cat_dist.append((cat, score, False))
+
+    barchart_data = [go.Bar(x = [row[0] for row in knn_cat_dist],
+			    y = [row[1] for row in knn_cat_dist]
+    )]
+
+    barchart_div = plot(barchart_data, output_type = "div")
+
+    piechart_data = [go.Pie(labels = [row[0] for row in knn_cat_dist], 
+			    values = [row[1] for row in knn_cat_dist]
+    )]
+
+    piechart_div = plot(piechart_data, output_type = "div")
+
     return render(request, 'rest.html', {'rest_info': rest_info,
                                          'rest_vec': rest_vec,
                                          'knn_infos': knn_infos,
-                                         'knn_cat_dist': knn_cat_dist})
+                                         'knn_cat_dist': knn_cat_dist,
+					 'barchart_div': barchart_div,
+					 'piechart_div': piechart_div})
