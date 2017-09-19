@@ -36,7 +36,7 @@ def detail(request, rest_id):
     similarity_types = [['euclidean', 'Euclidean distance', False],
                         ['manhattan', 'Manhattan distance', False],
                         ['inner', 'Inner product', False],
-                        ['sigmoid', 'Sigmoid of inner product', False],
+#                       ['sigmoid', 'Sigmoid of inner product', False],
                         ['cosine', 'Cosine', False]]
     selected_sim_type = request.GET.get('similarity', 'euclidean')
     for s in similarity_types:
