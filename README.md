@@ -97,7 +97,7 @@
 
     6.4 Delete all data from solr search engine
 
-        $curl http://<host>:<port>/solr/<core>/update?stream.body=<delete><query>*:*</query></delete>&commit=true
+        $curl "http://<host>:<port>/solr/<core>/update?stream.body=<delete><query>*:*</query></delete>&commit=true"
 
 
 7. Start django server
