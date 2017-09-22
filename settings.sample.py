@@ -5,6 +5,12 @@
 __author__ = 'sheep'
 
 
+#--- Solr settings ---
+SOLR_HOST = ''
+SOLR_PORT = None
+SOLR_CORE = 'test'
+
+#--- Mongodb settings ---
 DB_NAME = 'yelp'
 
 BUSINESS_COLL = 'business'
@@ -24,6 +30,7 @@ CHECKIN_FILE = 'res/small_dataset/yelp_academic_dataset_checkin.json'
 SEQ2ID_FILE = 'res/small_dataset/yelp_id_names.txt'
 SEQ2VEC_FILE = 'res/small_dataset/yelp_id_vectors.txt'
 
+#--- Network settings ---
 BUSINESS_CLASS = 'B'
 USER_CLASS = 'U'
 CITY_CLASS = 'C'

@@ -19,10 +19,12 @@ __author__ = 'sheep'
 def search(request):
     filtered = []
     if 'q' in request.GET:
-        solr = pysolr.Solr('http://localhost:8983/solr/gettingstarted/',
+        solr = pysolr.Solr('http://%s:%d/solr/%s/' % (settings.SOLR_HOST,
+                                                      settings.SOLR_PORT,
+                                                      settings.SOLR_CORE),
                            timeout=10)
         keywords = request.GET['q']
-        results = solr.search(keywords)
+        results = solr.search(keywords, rows=1000)
 
         vector_coll = mongodb_helper.get_coll(settings.VECTOR_COLL)
         for r in results:
