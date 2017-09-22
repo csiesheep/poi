@@ -14,7 +14,8 @@ class mongodb_helper(object):
     #TODO ip and port
     @staticmethod
     def get_client():
-        return MongoClient()
+        return MongoClient(host=settings.DB_HOST,
+                           port=settings.DB_PORT)
 
     @staticmethod
     def drop_db():

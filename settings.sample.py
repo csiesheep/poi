@@ -11,7 +11,9 @@ SOLR_PORT = None
 SOLR_CORE = 'test'
 
 #--- Mongodb settings ---
-DB_NAME = 'yelp'
+DB_HOST = ''
+DB_PORT = None
+DB_NAME = 'yelp_test'
 
 BUSINESS_COLL = 'business'
 USER_COLL = 'user'

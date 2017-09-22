@@ -63,9 +63,13 @@
 
         https://docs.mongodb.com/manual/administration/install-community/
 
-    5.2 Start mongodb
+    5.2 Modify conf of mongodb and start mongodb
+
+        $sudo vim /etc/mongodb.conf
 
         $sudo service mongod start
+        or
+        $sudo mongod --auth --dbpath /var/lib/mongodb
 
     5.3 Import data
 
