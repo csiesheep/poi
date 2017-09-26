@@ -10,6 +10,17 @@
     $sudo pip install pysolr
     $sudo pip install plotly
 
+    $sudo apt-get install neo4j
+    $sudo mkdir /var/run/neo4j
+    $sudo rm /var/lib/neo4j/data/dbms/auth
+    $sudo neo4j-admin set-initial-password sheep1234
+    $sudo vim /etc/neo4j/neo4j.conf
+    un-comment dbms.connectors.default_listen_address=0.0.0.0
+
+    $sudo neo4j start / stop / status / restart
+
+    $sudo pip install py2neo
+
 
 2. Prepare settings.py
 
