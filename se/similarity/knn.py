@@ -2,6 +2,7 @@
 # -*- encoding: utf8 -*-
 
 from math import *
+import numpy as np
 import unittest
 
 from db.db_helper import mongodb_helper
@@ -27,12 +28,17 @@ def get_knn(type_, id_, k=10):
         if type_ == 'manhattan':
             distance = by_manhattan_distance(v, v2)
         if type_ == 'inner':
-            distance = by_inner_product(v, v2)
+            distance = np.inner(v, v2)
         if type_ == 'sigmoid':
             distance = by_sigmoid_inner_product(v, v2)
         if type_ == 'cosine':
             distance = by_cosine(v, v2)
         distances.append((distance, business['id']))
+
+    if type_ in ['inner', 'sigmoid', 'cosine']:
+        results = sorted(distances, reverse=True)[1:k + 1]
+        print results
+        return results
     return sorted(distances)[1:k + 1]
 
 
