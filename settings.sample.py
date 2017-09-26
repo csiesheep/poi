@@ -5,7 +5,15 @@
 __author__ = 'sheep'
 
 
-DB_NAME = 'yelp'
+#--- Solr settings ---
+SOLR_HOST = ''
+SOLR_PORT = None
+SOLR_CORE = 'test'
+
+#--- Mongodb settings ---
+DB_HOST = ''
+DB_PORT = None
+DB_NAME = 'yelp_test'
 
 BUSINESS_COLL = 'business'
 USER_COLL = 'user'
@@ -24,7 +32,26 @@ CHECKIN_FILE = 'res/small_dataset/yelp_academic_dataset_checkin.json'
 SEQ2ID_FILE = 'res/small_dataset/yelp_id_names.txt'
 SEQ2VEC_FILE = 'res/small_dataset/yelp_id_vectors.txt'
 
+#--- Neo4j settings
+NEO4J_USER = 'neo4j'
+NEO4J_PASSWORD = ''
+NEO4J_HOST = ''
+NEO4J_PORT = 7474
+NEO4J_DB = ''
+
 BUSINESS_CLASS = 'B'
 USER_CLASS = 'U'
 CITY_CLASS = 'C'
 CATEGORY_CLASS = 'L'
+
+EDGE_CLASSES = {
+    (BUSINESS_CLASS, USER_CLASS): 'BU', #business to user
+    (USER_CLASS, BUSINESS_CLASS): 'UB', #user to business
+    (USER_CLASS, USER_CLASS): 'UU', #user to user
+    (BUSINESS_CLASS, CATEGORY_CLASS): 'BC', #business to category
+    (CATEGORY_CLASS, BUSINESS_CLASS): 'CB', #category to business
+    (BUSINESS_CLASS, CITY_CLASS): 'BL', #business to city
+    (CITY_CLASS, BUSINESS_CLASS): 'CB', #city to business
+}
+
+GRAPH_FILE = 'res/small_dataset/graph.txt'

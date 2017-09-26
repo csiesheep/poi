@@ -21,10 +21,12 @@ __author__ = 'sheep'
 def search(request):
     filtered = []
     if 'q' in request.GET:
-        solr = pysolr.Solr('http://localhost:8983/solr/gettingstarted/',
+        solr = pysolr.Solr('http://%s:%d/solr/%s/' % (settings.SOLR_HOST,
+                                                      settings.SOLR_PORT,
+                                                      settings.SOLR_CORE),
                            timeout=10)
         keywords = request.GET['q']
-        results = solr.search(keywords)
+        results = solr.search(keywords, rows=1000)
 
         vector_coll = mongodb_helper.get_coll(settings.VECTOR_COLL)
         for r in results:
@@ -40,13 +42,13 @@ def create_network(nodes, edges):
         G.add_node(node)
         for attribute in nodes[node]:
              G.node[node][attribute] = nodes[node][attribute]
-        if G.node[node]["type"] == "user": n_users += 1
+        if G.node[node]["type"] != settings.BUSINESS_CLASS: n_users += 1
 
     # set node position
     count_user = 0.0
     count_business = 0.0
     for node in G.nodes():
-        if G.node[node]["type"] == "user":
+        if G.node[node]["type"] in [settings.USER_CLASS, settings.CITY_CLASS]:
             G.node[node]["pos"] = [0.5, 0 + count_user / n_users]
             count_user += 1
         else:
@@ -103,7 +105,7 @@ def draw_network(G):
         node_trace['x'].append(x)
         node_trace['y'].append(y)	
         node_trace['text'].append(G.node[node]['name'])
-	if G.node[node]['type'] == 'business':
+	if G.node[node]['type'] == settings.BUSINESS_CLASS:
             node_trace['marker']['color'].append(-1)
         else:
             node_trace['marker']['color'].append(1)
@@ -154,13 +156,13 @@ def detail(request, rest_id):
         knn_cat_dist.append((cat, score, False))
 
     barchart_data = [go.Bar(x = [row[0] for row in knn_cat_dist],
-			    y = [row[1] for row in knn_cat_dist]
+                     y = [row[1] for row in knn_cat_dist]
     )]
 
     barchart_cat = plot(barchart_data, output_type = "div")
 
-    piechart_data = [go.Pie(labels = [row[0] for row in knn_cat_dist], 
-			    values = [row[1] for row in knn_cat_dist]
+    piechart_data = [go.Pie(labels = [row[0] for row in knn_cat_dist],
+                     values = [row[1] for row in knn_cat_dist]
     )]
 
     piechart_cat = plot(piechart_data, output_type = "div")
