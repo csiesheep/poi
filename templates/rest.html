@@ -1,163 +1,215 @@
+
+
 <!DOCTYPE html>
 {% load static %}
 <html lang="en">
-
-<head>
-	<!-- Bootstrap Core CSS -->
-    <link href="{% static "poi/bootstrap.min.css" %}" rel="stylesheet">
+   <head>
+      <!-- Bootstrap Core CSS -->
+      <link href="{% static "poi/bootstrap.min.css" %}" rel="stylesheet">
+      <!-- MetisMenu CSS -->
+      <link href="{% static "poi/metisMenu.min.css" %}" rel="stylesheet">
+      <!-- Custom CSS -->
+      <link href="{% static "poi/sb-admin-2.css" %}" rel="stylesheet">
+      <!-- Morris Charts CSS -->
+      <link href="{% static "poi/morris.css" %}" rel="stylesheet">
+      <!-- Custom Fonts -->
+      <link href="{% static "poi/font-awesome.min.css" %}" rel="stylesheet" type="text/css">
+      <script src="{% static "poi/jquery.min.js" %}"></script>
+      <link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap.tagsinput/0.4.2/bootstrap-tagsinput.css" />
+      <script src="//cdn.jsdelivr.net/bootstrap.tagsinput/0.4.2/bootstrap-tagsinput.min.js"></script>
     
-    <!-- MetisMenu CSS -->
-    <link href="{% static "poi/metisMenu.min.css" %}" rel="stylesheet">
-    
-    <!-- Custom CSS -->
-    <link href="{% static "poi/sb-admin-2.css" %}" rel="stylesheet">
-    
-    <!-- Morris Charts CSS -->
-    <link href="{% static "poi/morris.css" %}" rel="stylesheet">
-    
-    <!-- Custom Fonts -->
-    <link href="{% static "poi/font-awesome.min.css" %}" rel="stylesheet" type="text/css">
-
-    <script src="{% static "poi/jquery.min.js" %}"></script>
-
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap.tagsinput/0.4.2/bootstrap-tagsinput.css" />
-    <script src="//cdn.jsdelivr.net/bootstrap.tagsinput/0.4.2/bootstrap-tagsinput.min.js"></script>
-
-	<style type="text/css">
-	.bootstrap-tagsinput {
-	    width: 100%;
-	}
-	.label {
-	    line-height: 2 !important;
-	}
-	</style>
-
-</head>
-
-<body>
-
- <div id="wrapper">
- 
- <!-- Navigation -->
-        <!-- Navigation -->
-        <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="se.html">iPDA Yelp Demo</a>
+      <style type="text/css">
+         .bootstrap-tagsinput {
+         width: 100%;
+         }
+         .label {
+         line-height: 2 !important;
+         }
+         #myDIV {
+    width: 100%;
+    padding: 50px 0;
+    text-align: center;
+    background-color: white;
+    margin-top:20px;
+	display:hidden;
+}
+      </style>
+   </head>
+   <body>
+      <div id="wrapper">
+      <!-- Navigation -->
+      <!-- Navigation -->
+      <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+         <div class="navbar-header">
+            <a class="navbar-brand" href="se.html">iPDA Yelp Demo</a>
+         </div>
+         <!-- /.navbar-header -->
+         <div class="navbar-default sidebar" role="navigation">
+            <div class="sidebar-nav navbar-collapse">
+               <ul class="nav" id="side-menu">
+                  <li>
+                     <a href="index.html">Search</a>
+                  </li>
+                  <li>
+                     <a href="index.html">Others</a>
+                  </li>
+               </ul>
             </div>
-            <!-- /.navbar-header -->
-
-            <div class="navbar-default sidebar" role="navigation">
-                <div class="sidebar-nav navbar-collapse">
-                    <ul class="nav" id="side-menu">
-                        <li>
-                            <a href="index.html">Search</a>
-                        </li>
-                        <li>
-                            <a href="index.html">Others</a>
-                        </li>
-                    </ul>
-                </div>
-                <!-- /.sidebar-collapse -->
+            <!-- /.sidebar-collapse -->
+         </div>
+         <!-- /.navbar-static-side -->
+      </nav>
+      <div id="page-wrapper">
+         <div class="row">
+            <div class="col-lg-12">
+               <h2>Basic Information</h2>
+               <b>Business name:</b> {{ rest_info.name }}<br> 
+               <b>Stars:</b> {{ rest_info.stars }}<br>
+               <b>Address:</b> {{ rest_info.address }}, {{ rest_info.city }}<br>
+               <b>Categories:</b> <input type="text" value="{{ rest_info.categories|join:', '}}" data-role="tagsinput" class="form-control" />
+               <br>
+               <b>Latitude: </b> {{ rest_info.latitude }}, <b>Longitude: </b>{{ rest_info.longitude }}<br>
+               <h2>KNN top 10 similar businesses</h2>
+               <form method="GET" action="/{{ rest_info.business_id }}/" target="_blank">
+                  {% for s in similarity_types %}
+                  <input type="radio" name="similarity" value="{{ s.0 }}" {% if s.2 %}checked{% endif %}> {{s.1}}
+                  {% endfor %}
+                  <input type="submit" value="Submit">
+               </form>
+               {% for r in knn_infos %}
+               {{ forloop.counter0 }}. <a href="/{{ r.business_id }}/">{{ r.name }}</a><br>
+               {% endfor %}<br>
             </div>
-            <!-- /.navbar-static-side -->
-        </nav>
-        
-        <div id="page-wrapper">
-        	<div class="row">
-		<div class="col-lg-12">
+         </div>
+         <div class="row">
+            <h2>Summary statistics</h2>
+            <div class="col-lg-12">
+               <h3>Category distribution</h3>
 
-<h2>Basic Information</h2>
+		<div class = "row">
+		<div class = "col-lg-12">
+               <button type="button" class="btn btn-primary" onclick="myFunction('cat_table')">Table</button>
+	       <button type="button" class="btn btn-primary" onclick="myFunction('cat_bar')">Bar chart</button>
+	       <button type="button" class="btn btn-primary" onclick="myFunction('cat_pie')">Pie chart</button>
 
-<b>Business name:</b> {{ rest_info.name }}<br> 
-<b>Stars:</b> {{ rest_info.stars }}<br>
-<b>Address:</b> {{ rest_info.address }}, {{ rest_info.city }}<br>
-<b>Categories:</b> <input type="text" value="{{ rest_info.categories|join:', '}}" data-role="tagsinput" class="form-control" />
-<br>
-<b>Latitude: </b> {{ rest_info.latitude }}, <b>Longitude: </b>{{ rest_info.longitude }}<br>
-
-<h2>KNN top 10 similar businesses</h2>
-
-<form method="GET" action="/{{ rest_info.business_id }}/" target="_blank">
-  {% for s in similarity_types %}
-    <input type="radio" name="similarity" value="{{ s.0 }}" {% if s.2 %}checked{% endif %}> {{s.1}}
-  {% endfor %}
-  <input type="submit" value="Submit">
-</form>
-
-<font size="6">KNN</font><br>
-{% for r in knn_infos %}
-    {{ forloop.counter0 }}. <a href="/{{ r.business_id }}/">{{ r.name }}</a><br>
-{% endfor %}<br>
+		</div>
 </div>
+<div class = "row">
+		<div id="cat_table" class="col-lg-4" style="overflow: auto;height: 250px;  display: none;">
+                           <table class="table table-striped" >
+                              <thead>
+                                 <tr>
+                                    <th>Category name</th>
+                                    <th>Ratio</th>
+                                 </tr>
+                              </thead>
+                              <tbody>
+                                 {% for c in knn_cat_dist %}
+                                 <tr>
+                                    {% if c.2 %}
+                                    <td><font color="red">{{ c.0 }}</font></td>
+                                    <td>{{ c.1 }}</td>
+                                    {% else %}
+                                    <td>{{ c.0 }}</td>
+                                    <td>{{ c.1 }}</td>
+                                    {% endif %}
+                                 </tr>
+                                 {% endfor %}
+                              </tbody>
+                           </table>
+                        
+		</div>
+		<div id="cat_bar" class="col-lg-12">
+			<h3>Bar chart</h3>
+			{% autoescape off %}{{ barchart_cat }}{% endautoescape %}
+		</div>
+		<div id="cat_pie" class="col-lg-12">
+			{% autoescape off %}{{ piechart_cat }}{% endautoescape %}
+		</div>
+		</div>
+
+            </div>
+
+            <div class="col-lg-12">
+               <h3>City distribution</h3>
+
+		<div class = "row">
+		<div class = "col-lg-12">
+               <button type="button" class="btn btn-primary" onclick="myFunction('city_table')">Table</button>
+	       <button type="button" class="btn btn-primary" onclick="myFunction('city_bar')">Bar chart</button>
+	       <button type="button" class="btn btn-primary" onclick="myFunction('city_pie')">Pie chart</button>
+
+		</div>
 </div>
+<div class = "row">
+		<div id="city_table" class="col-lg-4" style="overflow: auto;height: 250px;  display: none;">
+                           <table class="table table-striped" >
+                              <thead>
+                                 <tr>
+                                    <th>City name</th>
+                                    <th>Ratio</th>
+                                 </tr>
+                              </thead>
+                              <tbody>
+                                 {% for c in knn_city_dist %}
+                                 <tr>
+                                    {% if c.2 %}
+                                    <td><font color="red">{{ c.0 }}</font></td>
+                                    <td>{{ c.1 }}</td>
+                                    {% else %}
+                                    <td>{{ c.0 }}</td>
+                                    <td>{{ c.1 }}</td>
+                                    {% endif %}
+                                 </tr>
+                                 {% endfor %}
+                              </tbody>
+                           </table>
+                        
+		</div>
+		<div id="city_bar" class="col-lg-12">
+			{% autoescape off %}{{ barchart_city }}{% endautoescape %}
+		</div>
+		<div id="city_pie" class="col-lg-12">
+			{% autoescape off %}{{ piechart_city }}{% endautoescape %}
+		</div>
+		</div>
 
-<div class="row">
-<div class="col-lg-12">
-	<h2>Summary statistics</h2>
-	<h3>Category distribution</h3>
-</div>
+            </div>
+         </div>
+	<!-- NETWORK VISUALIZATION-->
+         <div class = 'row'>
+		<h2>Network Analysis</h2>
+		<div class = 'col-lg-12'>
+			{% autoescape off %}{{ network_div }}{% endautoescape %}
+		</div>
+	 </div>
 
-<div class="col-lg-4" style="overflow: auto;height: 250px;" >
-<table class="table table-striped" >
-<thead>
-<tr>
-	<th>Category name</th>
-	<th>Ratio</th>
-</tr>
-</thead>
-<tbody>
-{% for c in knn_cat_dist %}
-<tr>
-    {% if c.2 %}
-        <td><font color="red">{{ c.0 }}</font></td> 
-        <td>{{ c.1 }}</td>
-    {% else %}
-        <td>{{ c.0 }}</td> 
-        <td>{{ c.1 }}</td>
-    {% endif %}
-</tr>
-{% endfor %}
-</tbody>
-</table>
+      </div>
+      <!-- jQuery -->
+      <script src="{% static "poi/jquery.min.js" %}"></script>
+      <!-- Bootstrap Core JavaScript -->
+      <script src="{% static "poi/bootstrap.min.js" %}"></script>
+      <!-- Metis Menu Plugin JavaScript -->
+      <script src="{% static "poi/metisMenu.min.js" %}"></script>
+      <!-- Morris Charts JavaScript -->
+      <script src="{% static "poi/raphael.min.js" %}"></script>
+      <script src="{% static "poi/morris.min.js" %}"></script>
+      <script src="{% static "poi/morris-data.js" %}"></script>
+      <!-- Custom Theme JavaScript -->
+      <script src="{% static "poi/sb-admin-2.js" %}"></script>
+      <!-- For tabs -->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+      <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+      <script>
+	function myFunction(divid) {
+	    var x = document.getElementById(divid);
+	    if (x.style.display === 'none') {
+		x.style.display = 'block';
+	    } else {
+		x.style.display = 'none';
+	    }
+	}
+	</script>
+   </body>
+</html>
 
-</div>
-</div>
-
-<h3>Bar chart</h3>
-
-{% autoescape off %}{{ barchart_div }}{% endautoescape %}
-
-<h3>Pie chart</h3>
-
-{% autoescape off %}{{ piechart_div }}{% endautoescape %}
-
-</div>
-
-   <!-- jQuery -->
-    <script src="{% static "poi/jquery.min.js" %}"></script>
-
-    <!-- Bootstrap Core JavaScript -->
-    <script src="{% static "poi/bootstrap.min.js" %}"></script>
-
-    <!-- Metis Menu Plugin JavaScript -->
-    <script src="{% static "poi/metisMenu.min.js" %}"></script>
-
-    <!-- Morris Charts JavaScript -->
-    <script src="{% static "poi/raphael.min.js" %}"></script>
-    <script src="{% static "poi/morris.min.js" %}"></script>
-    <script src="{% static "poi/morris-data.js" %}"></script>
-
-    <!-- Custom Theme JavaScript -->
-    <script src="{% static "poi/sb-admin-2.js" %}"></script>
-
-</body>
-<br>
-
-<font size="5">City distribution</font><br>
-{% for c in knn_city_dist %}
-    {% if c.2 %}
-        <font color="red">{{ c.0 }} ({{ c.1 }})</font><br>
-    {% else %}
-        {{ c.0 }} ({{ c.1 }})<br>
-    {% endif %}
-{% endfor %}
