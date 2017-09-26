@@ -79,7 +79,6 @@ def calc_distribution(input_list, quantity):
     return result_dict
 
 
-<<<<<<< HEAD
 ###################################################################
 # Added By: Licheng
 # Function Name: calc_geo_dist_distribution
@@ -165,7 +164,7 @@ def geo_distance_distribution(ids, target_coords):
     geo_dist_dist = calc_geo_dist_distribution(data_list, len(ids), target_coords)
     return sorted(geo_dist_dist.items(), key=lambda x: x[1], reverse=True)
 
-=======
+
 def city_distribution(ids):
     business_coll = mongodb_helper.get_coll(settings.BUSINESS_COLL)
     city_dist = {}
