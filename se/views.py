@@ -197,8 +197,11 @@ def detail(request, rest_id):
 #            3: {"name": "Burger King","type": "business"},
 #            4: {"name": "Anthony",    "type": "user"}}
     
-    G = create_network(nodes, edges)
-    network_div = draw_network(G)
+    if len(nodes) == 0:
+        network_div = ''
+    else:
+        G = create_network(nodes, edges)
+        network_div = draw_network(G)
 
     return render(request, 'rest.html', {'rest_info':        rest_info,
                                          'rest_vec':         rest_vec,
