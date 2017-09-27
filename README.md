@@ -9,17 +9,10 @@
     $sudo pip install django
     $sudo pip install pysolr
     $sudo pip install plotly
-
-    $sudo apt-get install neo4j
-    $sudo mkdir /var/run/neo4j
-    $sudo rm /var/lib/neo4j/data/dbms/auth
-    $sudo neo4j-admin set-initial-password sheep1234
-    $sudo vim /etc/neo4j/neo4j.conf
-    un-comment dbms.connectors.default_listen_address=0.0.0.0
-
-    $sudo neo4j start / stop / status / restart
-
+    $sudo pip install networkx
     $sudo pip install py2neo
+
+
 
 
 2. Prepare settings.py
@@ -114,11 +107,29 @@
 
         $curl "http://<host>:<port>/solr/<core>/update?stream.body=<delete><query>*:*</query></delete>&commit=true"
 
+7. Build up the graph database
 
-7. Start django server
+    * For implementation, you could skip this step and
+      ask the administrator for the settings of solr and modify settings.py
 
-    7.1 Update your ip to ALLOWED_HOSTS in rec/settings.py
+    7.1 Install neo4j (graph database)
+    
+        $sudo apt-get install neo4j
 
-    7.2 Start django local server
+    7.2 Start neo4j
+
+        $sudo mkdir /var/run/neo4j
+        $sudo rm /var/lib/neo4j/data/dbms/auth
+        $sudo neo4j-admin set-initial-password sheep1234
+        $sudo vim /etc/neo4j/neo4j.conf
+        un-comment dbms.connectors.default_listen_address=0.0.0.0
+        $sudo neo4j start / stop / status / restart / console
+
+
+8. Start django server
+
+    8.1 Update your ip to ALLOWED_HOSTS in rec/settings.py
+
+    8.2 Start django local server
 
         $python manage.py runserver 0.0.0.0:8001
