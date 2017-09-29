@@ -21,7 +21,7 @@ def main():
 #   graph.delete_all()
 #   create_nodes(graph, settings.GRAPH_FILE)
 #   create_indexes(graph)
-    create_edges(graph, settings.GRAPH_FILE)
+#   create_edges(graph, settings.GRAPH_FILE)
     show_statistics(graph)
     return 0
 
@@ -113,11 +113,17 @@ def show_statistics(graph):
     s = 'MATCH (n) RETURN DISTINCT count(labels(n)) as c, labels(n) as l;'
     for data in graph.run(s).data():
         print 'Node %s count: %d' % (data['l'][0], data['c'])
-    for (from_class,to_class), edge_class in settings.EDGE_CLASSES.items():
-        count = len(list(graph.run('MATCH (a:%s)-[]->(b:%s) '
-                                   'RETURN a.name, b.name'
-                                   '' % (from_class, to_class))))
-        print 'Edge %s count: %d' % (edge_class, count)
+
+#   s = ('MATCH ()-[n]-() '
+#        'RETURN DISTINCT count(type(n)) as c, type(n) as l;')
+#   for data in graph.run(s).data():
+#       print 'Edge %s count: %d' % (data['l'], data['c'])
+
+#   for (from_class,to_class), edge_class in settings.EDGE_CLASSES.items():
+#       count = len(list(graph.run('MATCH (a:%s)-[]->(b:%s) '
+#                                  'RETURN a.name, b.name'
+#                                  '' % (from_class, to_class))))
+#       print 'Edge %s count: %d' % (edge_class, count)
 
 #   for a in graph.run('MATCH (a)-[]-(b) RETURN a, b').data():
 #       print a

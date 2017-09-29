@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- encoding: utf8 -*-
 
-from py2neo import Graph
+from py2neo import authenticate, Graph
 from pymongo import MongoClient
 
 import settings
@@ -33,14 +33,14 @@ class Neo4j_helper(object):
 
     @staticmethod
     def get_client():
-        s = 'http://%s:%s@%s:%d/db/data/' % (settings.NEO4J_USER,
-                                             settings.NEO4J_PASSWORD,
-                                             settings.NEO4J_HOST,
-                                             settings.NEO4J_PORT)
-        print s
-        g = Graph(s)
-#       g = Graph(host=settings.NEO4J_HOST,
-#                 http_port=settings.NEO4J_PORT,
-#                 user=settings.NEO4J_USER,
-#                 password=settings.NEO4J_PORT)
+        authenticate('%s:%d' % (settings.NEO4J_HOST,
+                                settings.NEO4J_HTTP_PORT),
+                     settings.NEO4J_USER,
+                     settings.NEO4J_PASSWORD)
+        g = Graph(host=settings.NEO4J_HOST,
+                  user=settings.NEO4J_USER,
+                  password=settings.NEO4J_PASSWORD,
+                  http_port=settings.NEO4J_HTTP_PORT,
+                  https_port=settings.NEO4J_HTTPS_PORT,
+                  bolt_port=settings.NEO4J_BOLT_PORT)
         return g
