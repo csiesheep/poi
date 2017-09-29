@@ -121,9 +121,21 @@
         $sudo mkdir /var/run/neo4j
         $sudo rm /var/lib/neo4j/data/dbms/auth
         $sudo neo4j-admin set-initial-password sheep1234
+
         $sudo vim /etc/neo4j/neo4j.conf
         un-comment dbms.connectors.default_listen_address=0.0.0.0
+
         $sudo neo4j start / stop / status / restart / console
+
+    * 7.3 Prepare different databases (e.g., a test and a deploy database)
+
+        Prepare run multiple instances of neo4j. Each one instance need a neo4j.conf
+        In a neo4j.conf, to set 
+
+        dbms.active_database=<folder>
+        dbms.connector.bolt.listen_address=:<port>
+        dbms.connector.http.listen_address=:<port>
+        dbms.connector.https.listen_address=:<port>
 
 
 8. Start django server
