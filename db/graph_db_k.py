@@ -13,12 +13,15 @@ def get_paths(rest_id1, rest_id2, k):
             break
         return node['id'], node['name'], label
 
-    def update_nodes(node, id2seq, nodes):
+    def update_nodes(node, id2seq, nodes, on_path='inner'):
         id_, name, label = get_info(node)
         if id_ not in id2seq:
             seq = len(id2seq)+1
             id2seq[id_] = seq
-            nodes[seq] = {'name': name, 'type': label, 'id': id_}
+            nodes[seq] = {'name': name,
+                          'type': label,
+                          'id': id_,
+                          'on_path': on_path}
         return id2seq[id_]
 
 
@@ -28,6 +31,7 @@ def get_paths(rest_id1, rest_id2, k):
     nodes = {}
     edges = set([])
 
+#   rest_id2 = 'ybHlmdUHLPKfv85bRK4Wtw'
     for kth in range(1, k+1):
         nodeString = '[]'
         returnString = ''
@@ -41,8 +45,14 @@ def get_paths(rest_id1, rest_id2, k):
              '' % (rest_id1, nodeString, rest_id2, returnString))
 
         for data in client.run(s).data():
-            seq_S = update_nodes(data['S'], id2seq, nodes)
-            seq_E = update_nodes(data['E'], id2seq, nodes)
+            seq_S = update_nodes(data['S'],
+                                 id2seq,
+                                 nodes,
+                                 on_path='source')
+            seq_E = update_nodes(data['E'],
+                                 id2seq,
+                                 nodes,
+                                 on_path='destination')
             seq_a = update_nodes(data['a'], id2seq, nodes)
             edges.add((seq_S, seq_a))
             if kth == 1:  # append edges to the end node if k = 1
