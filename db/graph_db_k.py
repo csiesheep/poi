@@ -28,7 +28,6 @@ def get_paths(rest_id1, rest_id2, k):
     nodes = {}
     edges = set([])
 
-    rest_id2 = 'ybHlmdUHLPKfv85bRK4Wtw'
     for kth in range(1, k+1):
         nodeString = '[]'
         returnString = ''
