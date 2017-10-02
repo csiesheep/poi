@@ -113,6 +113,10 @@ def indexing():
     business_coll = mongodb_helper.get_coll(settings.BUSINESS_COLL)
     business_coll.create_index("business_id")
 
+    review_coll = mongodb_helper.get_coll(settings.REVIEW_COLL)
+    review_coll.create_index("business_id")
+    review_coll.create_index("user_id")
+
     vector_coll = mongodb_helper.get_coll(settings.VECTOR_COLL)
     vector_coll.create_index("id")
     vector_coll.create_index("type")
