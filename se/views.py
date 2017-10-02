@@ -4,7 +4,7 @@ import pysolr
 #from pymongo import MongoClient
 
 from db.db_helper import mongodb_helper
-from db import graph_db
+from db import graph_db, graph_db_k
 from se.similarity import knn
 import settings
 from se.statistics import distribution
@@ -29,8 +29,12 @@ def search(request):
         results = solr.search(keywords, rows=1000)
 
         vector_coll = mongodb_helper.get_coll(settings.VECTOR_COLL)
+        review_coll = mongodb_helper.get_coll(settings.REVIEW_COLL)
         for r in results:
-            if vector_coll.find_one({'id': r['business_id'][0]}) is not None:
+            b_id = r['business_id'][0]
+            if vector_coll.find_one({'id': b_id}) is not None:
+                review_count = review_coll.count({'business_id': b_id})
+                r['review_count'] = review_count
                 filtered.append(r)
 
     return render(request, 'se.html', {'rests': filtered})
@@ -189,7 +193,7 @@ def detail(request, rest_id):
     # network generation
     rest_id1 = rest_info['business_id']
     rest_id2 = knn_ids[0]
-    nodes, edges = graph_db.get_paths(rest_id1, rest_id2)
+    nodes, edges = graph_db_k.get_paths(rest_id1, rest_id2, 2)
     print nodes, edges
 #   edges = [(1,2), (3,2), (1,4), (3,4)]
 #   nodes = {1: {"name": "McDonald's", "type": "business"},

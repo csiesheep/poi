@@ -99,6 +99,7 @@
 		    {% for r in rests %}
 		    <h3><a href="/{{ r.business_id.0 }}/">{{ r.name.0 }}</a></h3> 
 		    <b>Stars:</b> {{ r.stars.0 }}<br>
+		    <b>Reviews:</b> {{ r.review_count }}<br>
 		    <b>Address:</b> {{ r.address.0 }}, {{ r.city.0 }}<br>
 		    <b>Categories:</b> <input type="text" value="{{ r.categories|join:', ' }}" data-role="tagsinput" class="form-control" />
 		    <br>
