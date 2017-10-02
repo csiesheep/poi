@@ -17,7 +17,6 @@
       <script src="{% static "poi/jquery.min.js" %}"></script>
       <link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap.tagsinput/0.4.2/bootstrap-tagsinput.css" />
       <script src="//cdn.jsdelivr.net/bootstrap.tagsinput/0.4.2/bootstrap-tagsinput.min.js"></script>
-    
       <style type="text/css">
          .bootstrap-tagsinput {
          width: 100%;
@@ -26,164 +25,171 @@
          line-height: 2 !important;
          }
          #myDIV {
-    width: 100%;
-    padding: 50px 0;
-    text-align: center;
-    background-color: white;
-    margin-top:20px;
-	display:hidden;
-}
+         width: 100%;
+         padding: 50px 0;
+         text-align: center;
+         background-color: white;
+         margin-top:20px;
+         display:hidden;
+         }
       </style>
    </head>
    <body>
       <div id="wrapper">
-      <!-- Navigation -->
-      <!-- Navigation -->
-      <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
-         <div class="navbar-header">
-            <a class="navbar-brand" href="se.html">iPDA Yelp Demo</a>
-         </div>
-         <!-- /.navbar-header -->
-         <div class="navbar-default sidebar" role="navigation">
-            <div class="sidebar-nav navbar-collapse">
-               <ul class="nav" id="side-menu">
-                  <li>
-                     <a href="index.html">Search</a>
-                  </li>
-                  <li>
-                     <a href="index.html">Others</a>
-                  </li>
-               </ul>
+         <!-- Navigation -->
+         <!-- Navigation -->
+         <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+            <div class="navbar-header">
+               <a class="navbar-brand" href="se.html">iPDA Yelp Demo</a>
             </div>
-            <!-- /.sidebar-collapse -->
-         </div>
-         <!-- /.navbar-static-side -->
-      </nav>
-      <div id="page-wrapper">
-         <div class="row">
-            <div class="col-lg-12">
-               <h2>Basic Information</h2>
-               <b>Business name:</b> {{ rest_info.name }}<br> 
-               <b>Stars:</b> {{ rest_info.stars }}<br>
-               <b>Address:</b> {{ rest_info.address }}, {{ rest_info.city }}<br>
-               <b>Categories:</b> <input type="text" value="{{ rest_info.categories|join:', '}}" data-role="tagsinput" class="form-control" />
-               <br>
-               <b>Latitude: </b> {{ rest_info.latitude }}, <b>Longitude: </b>{{ rest_info.longitude }}<br>
-               <h2>KNN top 10 similar businesses</h2>
-               <form method="GET" action="/{{ rest_info.business_id }}/" target="_blank">
-                  {% for s in similarity_types %}
-                  <input type="radio" name="similarity" value="{{ s.0 }}" {% if s.2 %}checked{% endif %}> {{s.1}}
-                  {% endfor %}
-                  <input type="submit" value="Submit">
-               </form>
-               {% for r in knn_infos %}
-               {{ forloop.counter0 }}. <a href="/{{ r.business_id }}/">{{ r.name }}</a><br>
-               {% endfor %}<br>
+            <!-- /.navbar-header -->
+            <div class="navbar-default sidebar" role="navigation">
+               <div class="sidebar-nav navbar-collapse">
+                  <ul class="nav" id="side-menu">
+                     <li>
+                        <a href="index.html">Search</a>
+                     </li>
+                     <li>
+                        <a href="index.html">Others</a>
+                     </li>
+                  </ul>
+               </div>
+               <!-- /.sidebar-collapse -->
             </div>
-         </div>
-         <div class="row">
-            <h2>Summary statistics</h2>
-            <div class="col-lg-12">
-               <h3>Category distribution</h3>
+            <!-- /.navbar-static-side -->
+         </nav>
+         <div id="page-wrapper">
+            <div class="row">
+               <div class="col-lg-12">
+                  <h2>Basic Information</h2>
+                  <b>Business name:</b> {{ rest_info.name }}<br> 
+                  <b>Stars:</b> {{ rest_info.stars }}<br>
+                  <b>Address:</b> {{ rest_info.address }}, {{ rest_info.city }}<br>
+                  <b>Categories:</b> <input type="text" value="{{ rest_info.categories|join:', '}}" data-role="tagsinput" class="form-control" />
+                  <br>
+                  <b>Latitude: </b> {{ rest_info.latitude }}, <b>Longitude: </b>{{ rest_info.longitude }}<br>
+                  <h2>KNN top 10 similar businesses</h2>
+                  <form method="GET" action="/{{ rest_info.business_id }}/" target="_blank">
+                     {% for s in similarity_types %}
+                     <input type="radio" name="similarity" value="{{ s.0 }}" {% if s.2 %}checked{% endif %}> {{s.1}}
+                     {% endfor %}
+                     <input type="submit" value="Submit">
+                  </form>
+                  {% for r in knn_infos %}
+                  {{ forloop.counter0 }}. <a href="/{{ r.business_id }}/">{{ r.name }}</a><br>
+                  {% endfor %}<br>
+               </div>
+            </div>
+            <div class="row">
+               <h2>Summary statistics</h2>
+               <div class="col-lg-12">
+                  <h3>Category Distribution</h3>
+                  <div class="panel panel-default">
+                     <div class="panel-body" id="panel-body">
+                        <ul class="nav nav-tabs">
+                           <li class="active"><a href="#cat_table" data-toggle="tab" onclick="resizeWin()">Table</a></li>
+                           <li><a href="#cat_bar" data-toggle="tab" onclick="resizeWin()">Bar</a></li>
+                           <li><a href="#cat_pie" data-toggle="tab" onclick="resizeWin()">Pie</a></li>
+                        </ul>
+                        <div class="tab-content" style="height: 500px;">
+                           <div id="a" class="tab-pane active" style="z-index:-1;">
+                              <div class = "row">
+                                 <div id="cat_table" class="col-lg-4" style="overflow: auto;height: 500px;">
+                                    <table class="table table-striped" >
+                                       <thead>
+                                          <tr>
+                                             <th>Category name</th>
+                                             <th>Ratio</th>
+                                          </tr>
+                                       </thead>
+                                       <tbody>
+                                          {% for c in knn_cat_dist %}
+                                          <tr>
+                                             {% if c.2 %}
+                                             <td><font color="red">{{ c.0 }}</font></td>
+                                             <td>{{ c.1 }}</td>
+                                             {% else %}
+                                             <td>{{ c.0 }}</td>
+                                             <td>{{ c.1 }}</td>
+                                             {% endif %}
+                                          </tr>
+                                          {% endfor %}
+                                       </tbody>
+                                    </table>
+                                 </div>
+                              </div>
+                           </div>
+                           <div id="cat_bar" class="tab-pane">
+                              <div class = "row">
+                                 {% autoescape off %}{{ barchart_cat }}{% endautoescape %}
+                              </div>
+                           </div>
+                           <div id="cat_pie" class="tab-pane">
+                              {% autoescape off %}{{ piechart_cat }}{% endautoescape %}
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            
 
-		<div class = "row">
-		<div class = "col-lg-12">
-               <button type="button" class="btn btn-primary" onclick="myFunction('cat_table')">Table</button>
-	       <button type="button" class="btn btn-primary" onclick="myFunction('cat_bar')">Bar chart</button>
-	       <button type="button" class="btn btn-primary" onclick="myFunction('cat_pie')">Pie chart</button>
-
-		</div>
+               <div class="col-lg-12">
+                  <h3>City Distribution</h3>
+                  <div class="panel panel-default">
+                     <div class="panel-body" id="panel-body">
+                        <ul class="nav nav-tabs">
+                           <li class="active"><a href="#city_table" data-toggle="tab" onclick="resizeWin()">Table</a></li>
+                           <li><a href="#city_bar" data-toggle="tab" onclick="resizeWin()">Bar</a></li>
+                           <li><a href="#city_pie" data-toggle="tab" onclick="resizeWin()">Pie</a></li>
+                        </ul>
+                        <div class="tab-content" style="height: 500px;">
+                           <div id="a" class="tab-pane active" style="z-index:-1;">
+                              <div class = "row">
+                                 <div id="city_table" class="col-lg-4" style="overflow: auto;height: 500px;">
+                                    <table class="table table-striped" >
+                                       <thead>
+                                          <tr>
+                                             <th>City name</th>
+                                             <th>Ratio</th>
+                                          </tr>
+                                       </thead>
+                                       <tbody>
+                                          {% for c in knn_city_dist %}
+                                          <tr>
+                                             {% if c.2 %}
+                                             <td><font color="red">{{ c.0 }}</font></td>
+                                             <td>{{ c.1 }}</td>
+                                             {% else %}
+                                             <td>{{ c.0 }}</td>
+                                             <td>{{ c.1 }}</td>
+                                             {% endif %}
+                                          </tr>
+                                          {% endfor %}
+                                       </tbody>
+                                    </table>
+                                 </div>
+                              </div>
+                           </div>
+                           <div id="city_bar" class="tab-pane">
+                              <div class = "row">
+                                 {% autoescape off %}{{ barchart_city }}{% endautoescape %}
+                              </div>
+                           </div>
+                           <div id="city_pie" class="tab-pane">
+                              {% autoescape off %}{{ piechart_city }}{% endautoescape %}
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
 </div>
-<div class = "row">
-		<div id="cat_table" class="col-lg-4" style="overflow: auto;height: 250px;  display: none;">
-                           <table class="table table-striped" >
-                              <thead>
-                                 <tr>
-                                    <th>Category name</th>
-                                    <th>Ratio</th>
-                                 </tr>
-                              </thead>
-                              <tbody>
-                                 {% for c in knn_cat_dist %}
-                                 <tr>
-                                    {% if c.2 %}
-                                    <td><font color="red">{{ c.0 }}</font></td>
-                                    <td>{{ c.1 }}</td>
-                                    {% else %}
-                                    <td>{{ c.0 }}</td>
-                                    <td>{{ c.1 }}</td>
-                                    {% endif %}
-                                 </tr>
-                                 {% endfor %}
-                              </tbody>
-                           </table>
-                        
-		</div>
-		<div id="cat_bar" class="col-lg-12">
-			<h3>Bar chart</h3>
-			{% autoescape off %}{{ barchart_cat }}{% endautoescape %}
-		</div>
-		<div id="cat_pie" class="col-lg-12">
-			{% autoescape off %}{{ piechart_cat }}{% endautoescape %}
-		</div>
-		</div>
-
-            </div>
-
-            <div class="col-lg-12">
-               <h3>City distribution</h3>
-
-		<div class = "row">
-		<div class = "col-lg-12">
-               <button type="button" class="btn btn-primary" onclick="myFunction('city_table')">Table</button>
-	       <button type="button" class="btn btn-primary" onclick="myFunction('city_bar')">Bar chart</button>
-	       <button type="button" class="btn btn-primary" onclick="myFunction('city_pie')">Pie chart</button>
-
-		</div>
-</div>
-<div class = "row">
-		<div id="city_table" class="col-lg-4" style="overflow: auto;height: 250px;  display: none;">
-                           <table class="table table-striped" >
-                              <thead>
-                                 <tr>
-                                    <th>City name</th>
-                                    <th>Ratio</th>
-                                 </tr>
-                              </thead>
-                              <tbody>
-                                 {% for c in knn_city_dist %}
-                                 <tr>
-                                    {% if c.2 %}
-                                    <td><font color="red">{{ c.0 }}</font></td>
-                                    <td>{{ c.1 }}</td>
-                                    {% else %}
-                                    <td>{{ c.0 }}</td>
-                                    <td>{{ c.1 }}</td>
-                                    {% endif %}
-                                 </tr>
-                                 {% endfor %}
-                              </tbody>
-                           </table>
-                        
-		</div>
-		<div id="city_bar" class="col-lg-12">
-			{% autoescape off %}{{ barchart_city }}{% endautoescape %}
-		</div>
-		<div id="city_pie" class="col-lg-12">
-			{% autoescape off %}{{ piechart_city }}{% endautoescape %}
-		</div>
-		</div>
-
-            </div>
-         </div>
-	<!-- NETWORK VISUALIZATION-->
+         <!-- NETWORK VISUALIZATION-->
          <div class = 'row'>
-		<h2>Network Analysis</h2>
-		<div class = 'col-lg-12'>
-			{% autoescape off %}{{ network_div }}{% endautoescape %}
-		</div>
-	 </div>
-
+            <h2>Network Analysis</h2>
+            <div class = 'col-lg-12'>
+               {% autoescape off %}{{ network_div }}{% endautoescape %}
+            </div>
+         </div>
       </div>
       <!-- jQuery -->
       <script src="{% static "poi/jquery.min.js" %}"></script>
@@ -201,15 +207,23 @@
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
       <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
       <script>
-	function myFunction(divid) {
-	    var x = document.getElementById(divid);
-	    if (x.style.display === 'none') {
-		x.style.display = 'block';
-	    } else {
-		x.style.display = 'none';
-	    }
-	}
-	</script>
+         function myFunction(divid) {
+             var x = document.getElementById(divid);
+             if (x.style.display === 'none') {
+         	x.style.display = 'block';
+             } else {
+         	x.style.display = 'none';
+             }
+         }
+      </script>
+      <script>
+         function resizeWin() {
+	     $(window).resizeTo($(window).width()+1, $(window).height()+1);
+             $(window).resizeTo($(window).width()-1, $(window).height()-1);
+             $(window).focus();
+         }
+      </script>
    </body>
 </html>
+
 
