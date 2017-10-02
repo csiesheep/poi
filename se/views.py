@@ -49,6 +49,7 @@ def create_network(nodes, edges):
         if G.node[node]["type"] != settings.BUSINESS_CLASS: n_users += 1
 
     # set node position
+    """
     count_user = 0.0
     count_business = 0.0
     for node in G.nodes():
@@ -58,12 +59,15 @@ def create_network(nodes, edges):
         else:
             G.node[node]["pos"] = [0 + count_business, 0.5]
             count_business += 1
+    """
     G.add_edges_from(edges)
 
     return G
 
 def draw_network(G):
-    pos=nx.get_node_attributes(G,'pos')
+    #pos=nx.get_node_attributes(G,'pos')
+    pos = nx.fruchterman_reingold_layout(G)
+    print pos
 
     dmin=1
     ncenter=0
@@ -84,8 +88,8 @@ def draw_network(G):
             mode='lines')
 
     for edge in G.edges():
-        x0, y0 = G.node[edge[0]]['pos']
-        x1, y1 = G.node[edge[1]]['pos']
+        x0, y0 = pos[edge[0]]
+        x1, y1 = pos[edge[1]]
         edge_trace['x'] += [x0, x1, None]
         edge_trace['y'] += [y0, y1, None]
 
@@ -105,7 +109,7 @@ def draw_network(G):
 		line=dict(width=2)))
 
     for node in G.nodes():
-        x, y = G.node[node]['pos']
+        x, y = pos[node]
         node_trace['x'].append(x)
         node_trace['y'].append(y)	
         node_trace['text'].append(G.node[node]['name'])
@@ -163,13 +167,13 @@ def detail(request, rest_id):
                      y = [row[1] for row in knn_cat_dist]
     )]
 
-    barchart_cat = plot(barchart_data, output_type = "div")
+    barchart_cat = plot(barchart_data, output_type = "div").replace("<div>", "<div style='height:500px'>")
 
-    piechart_data = [go.Pie(labels = [row[0] for row in knn_cat_dist],
+    piechart_data_cat = [go.Pie(labels = [row[0] for row in knn_cat_dist],
                      values = [row[1] for row in knn_cat_dist]
     )]
 
-    piechart_cat = plot(piechart_data, output_type = "div")
+    piechart_cat = plot(piechart_data_cat, output_type = "div").replace("<div>", "<div style='height:500px'>")
 
     city = rest_info['city']
     knn_city_dist = []
@@ -182,13 +186,17 @@ def detail(request, rest_id):
 			    y = [row[1] for row in knn_city_dist]
     )]
 
-    barchart_city = plot(barchart_data, output_type = "div")
+    barchart_city = plot(barchart_data, output_type = "div").replace("<div>", "<div style='height:500px'>")
+    f = open("tmp.html", "w")
+    f.write(barchart_city)
+    f.close()
 
     piechart_data = [go.Pie(labels = [row[0] for row in knn_city_dist], 
 			    values = [row[1] for row in knn_city_dist]
     )]
 
-    piechart_city = plot(piechart_data, output_type = "div")
+    piechart_city = plot(piechart_data, output_type = "div").replace("<div>", "<div style='height:500px'>")
+    
 
     # network generation
     rest_id1 = rest_info['business_id']
@@ -212,6 +220,7 @@ def detail(request, rest_id):
                                          'knn_infos':        knn_infos,
                                          'knn_cat_dist':     knn_cat_dist,
 					 'barchart_cat':     barchart_cat,
+					 'piechart_data_cat':    piechart_data_cat,
 					 'piechart_cat':     piechart_cat,
                                          'knn_city_dist':    knn_city_dist,
 					 'barchart_city':    barchart_city,
