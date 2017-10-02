@@ -23,41 +23,46 @@ def get_paths(rest_id1, rest_id2, k):
 
 
     client = Neo4j_helper.get_client()
-    
-    nodeString = '[]'
-    returnString = ''
-    c = list(string.ascii_lowercase) # get a list of lowercase alphabets
-    
-    # construct partial strings to query
-    for i in range(k):
-        nodeString += ('-(%s)-[]' % c[i])
-        returnString += (', %s' % c[i])
-        
-    s = ('MATCH (S:B {id:"%s"})-%s-(E:B {id:"%s"}) '
-         'RETURN S, E%s'
-         '' % (rest_id1, nodeString, rest_id2, returnString))
-    
+
     id2seq = {}
     nodes = {}
-    edges = []
-    i = 1
-    for data in client.run(s).data():
-        seq_S = update_nodes(data['S'], id2seq, nodes)
-        seq_E = update_nodes(data['E'], id2seq, nodes)
-        seq_a = update_nodes(data['a'], id2seq, nodes)
-        edges.append((seq_S, seq_E))
-        if k == 1:  # append edges to the end node if k = 1
-            edges.append((seq_a, seq_E))
-        while i < k:
-            seq_c1 = update_nodes(data[c[i-1]], id2seq, nodes)
-            seq_c2 = update_nodes(data[c[i]], id2seq, nodes)
-            edges.append((seq_c1, seq_c2))
-            if i+1 <k: # append edge to next node if there is still nodes left
-                seq_c3 = update_nodes(data[c[i+1]], id2seq, nodes)
-                edges.append((seq_c2, seq_c3))
-            else: # append edge to end node if i is the last node
-                edges.append((seq_c2, seq_E))
-            i += 2
-            if i == k: # append edge to end node if i+1 is the last node
-                edges.append((seq_c3, seq_E))
+    edges = set([])
+
+    rest_id2 = 'ybHlmdUHLPKfv85bRK4Wtw'
+    for kth in range(1, k+1):
+        nodeString = '[]'
+        returnString = ''
+        c = list(string.ascii_lowercase) # get a list of lowercase alphabets
+        # construct partial strings to query
+        for i in range(kth):
+            nodeString += ('-(%s)-[]' % c[i])
+            returnString += (', %s' % c[i])
+        s = ('MATCH (S:B {id:"%s"})-%s-(E:B {id:"%s"}) '
+             'RETURN DISTINCT S, E%s'
+             '' % (rest_id1, nodeString, rest_id2, returnString))
+
+        for data in client.run(s).data():
+            seq_S = update_nodes(data['S'], id2seq, nodes)
+            seq_E = update_nodes(data['E'], id2seq, nodes)
+            seq_a = update_nodes(data['a'], id2seq, nodes)
+            edges.add((seq_S, seq_a))
+            if kth == 1:  # append edges to the end node if k = 1
+                edges.add((seq_a, seq_E))
+            i = 1
+            while i < kth:
+                seq_c1 = update_nodes(data[c[i-1]], id2seq, nodes)
+                seq_c2 = update_nodes(data[c[i]], id2seq, nodes)
+                edges.add((seq_c1, seq_c2))
+
+                # append edge to next node if there is still nodes left
+                if i+1 <kth:
+                    seq_c3 = update_nodes(data[c[i+1]], id2seq, nodes)
+                    edges.add((seq_c2, seq_c3))
+                # append edge to end node if i is the last node
+                else:
+                    edges.add((seq_c2, seq_E))
+                i += 2
+                # append edge to end node if i+1 is the last node
+                if i == k:
+                    edges.add((seq_c3, seq_E))
     return nodes, edges
