@@ -48,18 +48,6 @@ def create_network(nodes, edges):
              G.node[node][attribute] = nodes[node][attribute]
         if G.node[node]["type"] != settings.BUSINESS_CLASS: n_users += 1
 
-    # set node position
-    """
-    count_user = 0.0
-    count_business = 0.0
-    for node in G.nodes():
-        if G.node[node]["type"] in [settings.USER_CLASS, settings.CITY_CLASS]:
-            G.node[node]["pos"] = [0.5, 0 + count_user / n_users]
-            count_user += 1
-        else:
-            G.node[node]["pos"] = [0 + count_business, 0.5]
-            count_business += 1
-    """
     G.add_edges_from(edges)
 
     return G
@@ -105,18 +93,21 @@ def draw_network(G):
 		# Jet' | 'RdBu' | 'Blackbody' | 'Earth' | 'Electric' | 'YIOrRd' | 'YIGnBu'
 		color = [],
 		reversescale=True,
-		size=20,
+		size = [], 
 		line=dict(width=2)))
-
+    
+    node_types = [settings.BUSINESS_CLASS, settings.USER_CLASS, settings.CITY_CLASS, settings.CATEGORY_CLASS]
+    node_path_roles = ["source", "destination", "inner"]
     for node in G.nodes():
         x, y = pos[node]
         node_trace['x'].append(x)
         node_trace['y'].append(y)	
         node_trace['text'].append(G.node[node]['name'])
-	if G.node[node]['type'] == settings.BUSINESS_CLASS:
-            node_trace['marker']['color'].append(-1)
+	node_trace['marker']['color'].append(node_types.index(G.node[node]['type']))
+        if G.node[node]['on_path'] in ["source", "destination"]:
+            node_trace['marker']['size'].append(30)
         else:
-            node_trace['marker']['color'].append(1)
+            node_trace['marker']['size'].append(20)
 
     fig = go.Figure(data=go.Data([edge_trace, node_trace]),
 		     layout=go.Layout(
