@@ -1,18 +1,17 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+import networkx as nx
+from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
+import plotly.graph_objs as go
 import pysolr
-#from pymongo import MongoClient
 
 from db.db_helper import mongodb_helper
-from db import graph_db
+from db import graph_db_k
 from se.similarity import knn
+from se.similarity import co_customers
 import settings
 from se.statistics import distribution
 
-# for plotting graphs
-from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
-import plotly.graph_objs as go
-import networkx as nx
 
 
 __author__ = 'sheep'
@@ -29,8 +28,12 @@ def search(request):
         results = solr.search(keywords, rows=1000)
 
         vector_coll = mongodb_helper.get_coll(settings.VECTOR_COLL)
+        review_coll = mongodb_helper.get_coll(settings.REVIEW_COLL)
         for r in results:
-            if vector_coll.find_one({'id': r['business_id'][0]}) is not None:
+            b_id = r['business_id'][0]
+            if vector_coll.find_one({'id': b_id}) is not None:
+                review_count = review_coll.count({'business_id': b_id})
+                r['review_count'] = review_count
                 filtered.append(r)
 
     return render(request, 'se.html', {'rests': filtered})
@@ -44,22 +47,14 @@ def create_network(nodes, edges):
              G.node[node][attribute] = nodes[node][attribute]
         if G.node[node]["type"] != settings.BUSINESS_CLASS: n_users += 1
 
-    # set node position
-    count_user = 0.0
-    count_business = 0.0
-    for node in G.nodes():
-        if G.node[node]["type"] in [settings.USER_CLASS, settings.CITY_CLASS]:
-            G.node[node]["pos"] = [0.5, 0 + count_user / n_users]
-            count_user += 1
-        else:
-            G.node[node]["pos"] = [0 + count_business, 0.5]
-            count_business += 1
     G.add_edges_from(edges)
 
     return G
 
 def draw_network(G):
-    pos=nx.get_node_attributes(G,'pos')
+    #pos=nx.get_node_attributes(G,'pos')
+    pos = nx.fruchterman_reingold_layout(G)
+    print pos
 
     dmin=1
     ncenter=0
@@ -80,8 +75,8 @@ def draw_network(G):
             mode='lines')
 
     for edge in G.edges():
-        x0, y0 = G.node[edge[0]]['pos']
-        x1, y1 = G.node[edge[1]]['pos']
+        x0, y0 = pos[edge[0]]
+        x1, y1 = pos[edge[1]]
         edge_trace['x'] += [x0, x1, None]
         edge_trace['y'] += [y0, y1, None]
 
@@ -97,18 +92,21 @@ def draw_network(G):
 		# Jet' | 'RdBu' | 'Blackbody' | 'Earth' | 'Electric' | 'YIOrRd' | 'YIGnBu'
 		color = [],
 		reversescale=True,
-		size=20,
+		size = [], 
 		line=dict(width=2)))
-
+    
+    node_types = [settings.BUSINESS_CLASS, settings.USER_CLASS, settings.CITY_CLASS, settings.CATEGORY_CLASS]
+    node_path_roles = ["source", "destination", "inner"]
     for node in G.nodes():
-        x, y = G.node[node]['pos']
+        x, y = pos[node]
         node_trace['x'].append(x)
         node_trace['y'].append(y)	
         node_trace['text'].append(G.node[node]['name'])
-	if G.node[node]['type'] == settings.BUSINESS_CLASS:
-            node_trace['marker']['color'].append(-1)
+	node_trace['marker']['color'].append(node_types.index(G.node[node]['type']))
+        if G.node[node]['on_path'] in ["source", "destination"]:
+            node_trace['marker']['size'].append(30)
         else:
-            node_trace['marker']['color'].append(1)
+            node_trace['marker']['size'].append(20)
 
     fig = go.Figure(data=go.Data([edge_trace, node_trace]),
 		     layout=go.Layout(
@@ -146,6 +144,11 @@ def detail(request, rest_id):
     knn_ids = [id_ for _, id_ in knn.get_knn(selected_sim_type, rest_id)]
     knn_infos = [business_coll.find_one({'business_id': id_})
                  for id_ in knn_ids]
+    for b in knn_infos:
+        b['co_user_count'] = co_customers.get_number_com_customers(rest_id,
+                                                          b['business_id'])
+        b['co_user_ratio'] = co_customers.get_ratio_com_customers(rest_id,
+                                                          b['business_id'])
 
     categories = rest_info['categories']
     knn_cat_dist = []
@@ -159,13 +162,13 @@ def detail(request, rest_id):
                      y = [row[1] for row in knn_cat_dist]
     )]
 
-    barchart_cat = plot(barchart_data, output_type = "div")
+    barchart_cat = plot(barchart_data, output_type = "div").replace("<div>", "<div style='height:500px'>")
 
-    piechart_data = [go.Pie(labels = [row[0] for row in knn_cat_dist],
+    piechart_data_cat = [go.Pie(labels = [row[0] for row in knn_cat_dist],
                      values = [row[1] for row in knn_cat_dist]
     )]
 
-    piechart_cat = plot(piechart_data, output_type = "div")
+    piechart_cat = plot(piechart_data_cat, output_type = "div").replace("<div>", "<div style='height:500px'>")
 
     city = rest_info['city']
     knn_city_dist = []
@@ -178,18 +181,22 @@ def detail(request, rest_id):
 			    y = [row[1] for row in knn_city_dist]
     )]
 
-    barchart_city = plot(barchart_data, output_type = "div")
+    barchart_city = plot(barchart_data, output_type = "div").replace("<div>", "<div style='height:500px'>")
+    f = open("tmp.html", "w")
+    f.write(barchart_city)
+    f.close()
 
     piechart_data = [go.Pie(labels = [row[0] for row in knn_city_dist], 
 			    values = [row[1] for row in knn_city_dist]
     )]
 
-    piechart_city = plot(piechart_data, output_type = "div")
+    piechart_city = plot(piechart_data, output_type = "div").replace("<div>", "<div style='height:500px'>")
+    
 
     # network generation
     rest_id1 = rest_info['business_id']
     rest_id2 = knn_ids[0]
-    nodes, edges = graph_db.get_paths(rest_id1, rest_id2)
+    nodes, edges = graph_db_k.get_paths(rest_id1, rest_id2, 2)
     print nodes, edges
 #   edges = [(1,2), (3,2), (1,4), (3,4)]
 #   nodes = {1: {"name": "McDonald's", "type": "business"},
@@ -208,6 +215,7 @@ def detail(request, rest_id):
                                          'knn_infos':        knn_infos,
                                          'knn_cat_dist':     knn_cat_dist,
 					 'barchart_cat':     barchart_cat,
+					 'piechart_data_cat':    piechart_data_cat,
 					 'piechart_cat':     piechart_cat,
                                          'knn_city_dist':    knn_city_dist,
 					 'barchart_city':    barchart_city,
