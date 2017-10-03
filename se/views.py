@@ -1,18 +1,17 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+import networkx as nx
+from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
+import plotly.graph_objs as go
 import pysolr
-#from pymongo import MongoClient
 
 from db.db_helper import mongodb_helper
-from db import graph_db, graph_db_k
+from db import graph_db_k
 from se.similarity import knn
+from se.similarity import co_customers
 import settings
 from se.statistics import distribution
 
-# for plotting graphs
-from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
-import plotly.graph_objs as go
-import networkx as nx
 
 
 __author__ = 'sheep'
@@ -145,6 +144,11 @@ def detail(request, rest_id):
     knn_ids = [id_ for _, id_ in knn.get_knn(selected_sim_type, rest_id)]
     knn_infos = [business_coll.find_one({'business_id': id_})
                  for id_ in knn_ids]
+    for b in knn_infos:
+        b['co_user_count'] = co_customers.get_number_com_customers(rest_id,
+                                                          b['business_id'])
+        b['co_user_ratio'] = co_customers.get_ratio_com_customers(rest_id,
+                                                          b['business_id'])
 
     categories = rest_info['categories']
     knn_cat_dist = []
