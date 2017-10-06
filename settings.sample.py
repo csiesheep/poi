@@ -31,6 +31,12 @@ CHECKIN_FILE = 'res/small_dataset/yelp_academic_dataset_checkin.json'
 
 SEQ2ID_FILE = 'res/small_dataset/yelp_id_names.txt'
 SEQ2VEC_FILE = 'res/small_dataset/yelp_id_vectors.txt'
+SEQ2VEC_DEEPWALK_FILE = 'res/small_dataset/yelp_id_vectors_DeepWalk.txt'
+SEQ2VEC_PTE_FILE = 'res/small_dataset/yelp_id_vectors_PTE.txt'
+SEQ2VEC_ESIM_FILE = 'res/small_dataset/yelp_id_vectors_ESim.txt'
+#TODO
+#SEQ2VEC_LINE_FILE = 'res/small_dataset/yelp_id_vectors.txt'
+#SEQ2VEC_HINE_FILE = 'res/small_dataset/yelp_id_vectors.txt'
 
 #--- Neo4j settings
 NEO4J_USER = 'neo4j'
