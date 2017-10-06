@@ -21,6 +21,12 @@ REVIEW_COLL = 'review'
 TIP_COLL = 'tip'
 CHECKIN_COLL = 'checkin'
 VECTOR_COLL = 'vector'
+VECTOR_DEEPWALK_COLL = 'vector_deepwalk'
+VECTOR_PTE_COLL = 'vector_pte'
+VECTOR_ESIM_COLL = 'vector_esim'
+#TODO
+#VECTOR_LINE_COLL = 'vector_line'
+#VECTOR_HINE_COLL = 'vector_hine'
 
 BUSINESS_FILE = 'res/small_dataset/yelp_academic_dataset_business.json'
 INDEXING_FILE = 'res/small_dataset/yelp_academic_dataset_business_for_indexing.json'
