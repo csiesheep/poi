@@ -150,16 +150,18 @@ def detail(request, rest_id):
             break
     print selected_sim_type, selected_approach
 
-    knn_ids = [id_ for _, id_ in knn.get_knn(selected_sim_type,
-                                             rest_id,
-                                             approach=selected_approach)]
+    knn_result = knn.get_knn(selected_sim_type,
+                             rest_id,
+                             approach=selected_approach)
+    knn_ids = [id_ for _, id_ in knn_result]
     knn_infos = [business_coll.find_one({'business_id': id_})
                  for id_ in knn_ids]
-    for b in knn_infos:
+    for ith, b in enumerate(knn_infos):
         b['co_user_count'] = co_customers.get_number_com_customers(rest_id,
                                                           b['business_id'])
         b['co_user_ratio'] = co_customers.get_ratio_com_customers(rest_id,
                                                           b['business_id'])
+        b['score'] = knn_result[ith][0]
 
     categories = rest_info['categories']
     knn_cat_dist = []

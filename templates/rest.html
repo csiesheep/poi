@@ -104,6 +104,7 @@
                   <tr>
                       <th>No.</th>
                       <th>Restaurant name</th>
+                      <th>Similarity score</th>
                       <th>Co-customer count</th>
                       <th>Co-customer ratio</th>
                   </tr>
@@ -111,6 +112,7 @@
                   <tr>
                       <td>{{ forloop.counter0 }}</td>
                       <td><a href="/{{ r.business_id }}/">{{ r.name }}</a></td>
+                      <td>{{ r.score}}</td>
                       <td>{{ r.co_user_count}}</td>
                       <td>{{ r.co_user_ratio}}</td>
                   </tr>
