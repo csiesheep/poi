@@ -12,10 +12,16 @@ import settings
 __author__ = 'sheep'
 
 
-def get_knn(type_, id_, k=10):
-    print type_
+def get_knn(type_, id_, k=10, approach='hin2vec'):
     distances = []
-    vector_coll = mongodb_helper.get_coll(settings.VECTOR_COLL)
+    #TODO refector
+    coll_mapping = {
+        'hin2vec': settings.VECTOR_COLL,
+        'deepwalk': settings.VECTOR_DEEPWALK_COLL,
+        'pte': settings.VECTOR_PTE_COLL,
+        'esim': settings.VECTOR_ESIM_COLL,
+    }
+    vector_coll = mongodb_helper.get_coll(coll_mapping[approach])
     rest = vector_coll.find_one({'id': id_})
     if rest is None:
         return []

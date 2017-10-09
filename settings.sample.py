@@ -20,7 +20,14 @@ USER_COLL = 'user'
 REVIEW_COLL = 'review'
 TIP_COLL = 'tip'
 CHECKIN_COLL = 'checkin'
+#TODO refactor with SEQ2VEC_FILE
 VECTOR_COLL = 'vector'
+VECTOR_DEEPWALK_COLL = 'vector_deepwalk'
+VECTOR_PTE_COLL = 'vector_pte'
+VECTOR_ESIM_COLL = 'vector_esim'
+#TODO
+#VECTOR_LINE_COLL = 'vector_line'
+#VECTOR_HINE_COLL = 'vector_hine'
 
 BUSINESS_FILE = 'res/small_dataset/yelp_academic_dataset_business.json'
 INDEXING_FILE = 'res/small_dataset/yelp_academic_dataset_business_for_indexing.json'
@@ -31,6 +38,12 @@ CHECKIN_FILE = 'res/small_dataset/yelp_academic_dataset_checkin.json'
 
 SEQ2ID_FILE = 'res/small_dataset/yelp_id_names.txt'
 SEQ2VEC_FILE = 'res/small_dataset/yelp_id_vectors.txt'
+SEQ2VEC_DEEPWALK_FILE = 'res/small_dataset/yelp_id_vectors_DeepWalk.txt'
+SEQ2VEC_PTE_FILE = 'res/small_dataset/yelp_id_vectors_PTE.txt'
+SEQ2VEC_ESIM_FILE = 'res/small_dataset/yelp_id_vectors_ESim.txt'
+#TODO
+#SEQ2VEC_LINE_FILE = 'res/small_dataset/yelp_id_vectors.txt'
+#SEQ2VEC_HINE_FILE = 'res/small_dataset/yelp_id_vectors.txt'
 
 #--- Neo4j settings
 NEO4J_USER = 'neo4j'

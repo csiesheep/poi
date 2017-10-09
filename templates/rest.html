@@ -95,15 +95,28 @@
 
                   <h2>KNN top 10 similar businesses</h2>
                   <form method="GET" action="/{{ rest_info.business_id }}/" target="_blank">
-                     {% for s in similarity_types %}
-                     <input type="radio" name="similarity" value="{{ s.0 }}" {% if s.2 %}checked{% endif %}> {{s.1}}
-                     {% endfor %}
+                      Similarity function: 
+                      <fieldset id="similarity">
+                         {% for s in similarity_types %}
+                         <input type="radio" name="similarity" value="{{ s.0 }}" {% if s.2 %}checked{% endif %}> {{s.1}}
+                         {% endfor %}
+                      </fieldset>
+                      <br>
+                      Learning approach: 
+                      <fieldset id="approach">
+                         {% for s in approaches %}
+                         <input type="radio" name="approach" value="{{ s.0 }}" {% if s.2 %}checked{% endif %}> {{s.1}}
+                         {% endfor %}
+                      </fieldset>
+                      <br>
+
                      <input type="submit" value="Submit">
                   </form>
                   <table>
                   <tr>
                       <th>No.</th>
                       <th>Restaurant name</th>
+                      <th>Similarity score</th>
                       <th>Co-customer count</th>
                       <th>Co-customer ratio</th>
                   </tr>
@@ -111,6 +124,7 @@
                   <tr>
                       <td>{{ forloop.counter0 }}</td>
                       <td><a href="/{{ r.business_id }}/">{{ r.name }}</a></td>
+                      <td>{{ r.score}}</td>
                       <td>{{ r.co_user_count}}</td>
                       <td>{{ r.co_user_ratio}}</td>
                   </tr>
@@ -270,6 +284,12 @@
              $(window).focus();
          }
       </script>
+
+<h2>Meta-path count</h2><br>
+{% for meta_path in meta_paths %}
+<b>{{ meta_path.0 }}</b>: {{ meta_path.1 }} <br>
+{% endfor %}
+
    </body>
 </html>
 
