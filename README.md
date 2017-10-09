@@ -11,8 +11,9 @@
     $sudo pip install plotly
     $sudo pip install networkx
     $sudo pip install py2neo
-
-
+    $sudo pip install nltk
+    $sudo pip install sklearn
+    $sudo pip install scipy
 
 
 2. Prepare settings.py

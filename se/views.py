@@ -6,7 +6,7 @@ import plotly.graph_objs as go
 import pysolr
 
 from db.db_helper import mongodb_helper
-from db import graph_db_k
+from db import graph_db
 from se.similarity import knn
 from se.similarity import co_customers
 import settings
@@ -52,7 +52,6 @@ def create_network(nodes, edges):
     return G
 
 def draw_network(G):
-    #pos=nx.get_node_attributes(G,'pos')
     pos = nx.fruchterman_reingold_layout(G)
     print pos
 
@@ -84,44 +83,44 @@ def draw_network(G):
             x=[],
             y=[],
             text=[],
-	    mode='markers',
-	    hoverinfo='text',
-	    marker=go.Marker(
-		# colorscale options
-		# 'Greys' | 'Greens' | 'Bluered' | 'Hot' | 'Picnic' | 'Portland' |
-		# Jet' | 'RdBu' | 'Blackbody' | 'Earth' | 'Electric' | 'YIOrRd' | 'YIGnBu'
-		color = [],
-		reversescale=True,
-		size = [], 
-		line=dict(width=2)))
-    
+            mode='markers',
+            hoverinfo='text',
+            marker=go.Marker(
+            color = [],
+            reversescale=True,
+            size = [],
+            line=dict(width=2)))
+
     node_types = [settings.BUSINESS_CLASS, settings.USER_CLASS, settings.CITY_CLASS, settings.CATEGORY_CLASS]
     node_path_roles = ["source", "destination", "inner"]
     for node in G.nodes():
         x, y = pos[node]
         node_trace['x'].append(x)
-        node_trace['y'].append(y)	
+        node_trace['y'].append(y)
         node_trace['text'].append(G.node[node]['name'])
-	node_trace['marker']['color'].append(node_types.index(G.node[node]['type']))
+        node_trace['marker']['color'].append(node_types.index(G.node[node]['type']))
         if G.node[node]['on_path'] in ["source", "destination"]:
             node_trace['marker']['size'].append(30)
         else:
             node_trace['marker']['size'].append(20)
 
     fig = go.Figure(data=go.Data([edge_trace, node_trace]),
-		     layout=go.Layout(
-		        title='Co-consumer Graph',
-		        titlefont=dict(size=16),
-		        showlegend=False,
-		        hovermode='closest',
-		        margin=dict(b=20,l=5,r=5,t=40),
-		        annotations=[ dict(
-		            showarrow=False,
-		            xref="paper", yref="paper",
-		            x=0.005, y=-0.002 ) ],
-		        xaxis=go.XAxis(showgrid=False, zeroline=False, showticklabels=False),
-		        yaxis=go.YAxis(showgrid=False, zeroline=False, showticklabels=False)))
-
+                    layout=go.Layout(
+                        title='Sub-network between two restaurants',
+                        titlefont=dict(size=16),
+                        showlegend=False,
+                        hovermode='closest',
+                        margin=dict(b=20,l=5,r=5,t=40),
+                        annotations=[ dict(
+                            showarrow=False,
+                            xref="paper", yref="paper",
+                            x=0.005, y=-0.002 ) ],
+                        xaxis=go.XAxis(showgrid=False,
+                                       zeroline=False,
+                                       showticklabels=False),
+                        yaxis=go.YAxis(showgrid=False,
+                                       zeroline=False,
+                                       showticklabels=False)))
     return plot(fig, output_type = "div")
 
 def detail(request, rest_id):
@@ -133,7 +132,6 @@ def detail(request, rest_id):
     similarity_types = [['euclidean', 'Euclidean distance', False],
                         ['manhattan', 'Manhattan distance', False],
                         ['inner', 'Inner product', False],
-#                       ['sigmoid', 'Sigmoid of inner product', False],
                         ['cosine', 'Cosine', False]]
     selected_sim_type = request.GET.get('similarity', 'euclidean')
     for s in similarity_types:
@@ -178,47 +176,52 @@ def detail(request, rest_id):
             continue
         knn_city_dist.append((c, score, False))
     barchart_data = [go.Bar(x = [row[0] for row in knn_city_dist],
-			    y = [row[1] for row in knn_city_dist]
-    )]
+                            y = [row[1] for row in knn_city_dist])]
 
     barchart_city = plot(barchart_data, output_type = "div").replace("<div>", "<div style='height:500px'>")
     f = open("tmp.html", "w")
     f.write(barchart_city)
     f.close()
 
-    piechart_data = [go.Pie(labels = [row[0] for row in knn_city_dist], 
-			    values = [row[1] for row in knn_city_dist]
-    )]
+    piechart_data = [go.Pie(labels = [row[0] for row in knn_city_dist],
+                            values = [row[1] for row in knn_city_dist])]
 
     piechart_city = plot(piechart_data, output_type = "div").replace("<div>", "<div style='height:500px'>")
-    
 
     # network generation
     rest_id1 = rest_info['business_id']
     rest_id2 = knn_ids[0]
-    nodes, edges = graph_db_k.get_paths(rest_id1, rest_id2, 2)
+    nodes, edges = graph_db.get_paths(rest_id1, rest_id2, 2)
     print nodes, edges
-#   edges = [(1,2), (3,2), (1,4), (3,4)]
-#   nodes = {1: {"name": "McDonald's", "type": "business"},
-#            2: {"name": "Jack",       "type": "user"},
-#            3: {"name": "Burger King","type": "business"},
-#            4: {"name": "Anthony",    "type": "user"}}
-    
+
     if len(nodes) == 0:
         network_div = ''
     else:
         G = create_network(nodes, edges)
         network_div = draw_network(G)
 
-    return render(request, 'rest.html', {'rest_info':        rest_info,
-                                         'rest_vec':         rest_vec,
-                                         'knn_infos':        knn_infos,
-                                         'knn_cat_dist':     knn_cat_dist,
-					 'barchart_cat':     barchart_cat,
-					 'piechart_data_cat':    piechart_data_cat,
-					 'piechart_cat':     piechart_cat,
-                                         'knn_city_dist':    knn_city_dist,
-					 'barchart_city':    barchart_city,
-					 'piechart_city':    piechart_city,
-					 'network_div':      network_div,
-					 'similarity_types': similarity_types})
+    rest_id1 = rest_info['business_id']
+    rest_id2 = knn_ids[0]
+    meta_paths = graph_db.get_meta_path_count(rest_id1, rest_id2, 2)
+    temp_ = []
+    for mp, count in sorted(meta_paths.items(), key=lambda x: len(x[0])):
+        temp_.append(('B-%s-B' % ('-'.join(mp)), count))
+    meta_paths = temp_
+
+    return render(request,
+                  'rest.html',
+                  {
+                    'rest_info':        rest_info,
+                    'rest_vec':         rest_vec,
+                    'knn_infos':        knn_infos,
+                    'knn_cat_dist':     knn_cat_dist,
+                    'barchart_cat':     barchart_cat,
+                    'piechart_data_cat':    piechart_data_cat,
+                    'piechart_cat':     piechart_cat,
+                    'knn_city_dist':    knn_city_dist,
+                    'barchart_city':    barchart_city,
+                    'piechart_city':    piechart_city,
+                    'network_div':      network_div,
+                    'similarity_types': similarity_types,
+                    'meta_paths': meta_paths,
+                  })

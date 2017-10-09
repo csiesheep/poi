@@ -249,6 +249,12 @@
              $(window).focus();
          }
       </script>
+
+<h2>Meta-path count</h2><br>
+{% for meta_path in meta_paths %}
+<b>{{ meta_path.0 }}</b>: {{ meta_path.1 }} <br>
+{% endfor %}
+
    </body>
 </html>
 
