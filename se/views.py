@@ -130,6 +130,11 @@ def detail(request, rest_id):
     vector_coll = mongodb_helper.get_coll(settings.VECTOR_COLL)
     rest_vec = vector_coll.find_one({'id': rest_id})
 
+    # generate google map search string
+    query = "https://www.google.com/maps/embed/v1/place?key=AIzaSyC0woDjDcggf1PhuX9POXxTO0F059_JpjU"
+    query += "&q=" + "+".join(rest_info['address'].split(" "))
+    query += "," + "+".join(rest_info['city'].split(" "))
+
     similarity_types = [['euclidean', 'Euclidean distance', False],
                         ['manhattan', 'Manhattan distance', False],
                         ['inner', 'Inner product', False],
@@ -192,10 +197,10 @@ def detail(request, rest_id):
 
     piechart_city = plot(piechart_data, output_type = "div").replace("<div>", "<div style='height:500px'>")
     
-
     # network generation
     rest_id1 = rest_info['business_id']
-    rest_id2 = knn_ids[0]
+    #rest_id2 = knn_ids[0]
+    rest_id2 = knn_ids[int(request.GET.get('knn_business', 0))]
     nodes, edges = graph_db_k.get_paths(rest_id1, rest_id2, 2)
     print nodes, edges
 #   edges = [(1,2), (3,2), (1,4), (3,4)]
@@ -210,8 +215,10 @@ def detail(request, rest_id):
         G = create_network(nodes, edges)
         network_div = draw_network(G)
 
+    # added query for google map api
     return render(request, 'rest.html', {'rest_info':        rest_info,
                                          'rest_vec':         rest_vec,
+                                         'query':            query,
                                          'knn_infos':        knn_infos,
                                          'knn_cat_dist':     knn_cat_dist,
 					 'barchart_cat':     barchart_cat,

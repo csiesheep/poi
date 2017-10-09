@@ -81,6 +81,18 @@
                   <b>Categories:</b> <input type="text" value="{{ rest_info.categories|join:', '}}" data-role="tagsinput" class="form-control" />
                   <br>
                   <b>Latitude: </b> {{ rest_info.latitude }}, <b>Longitude: </b>{{ rest_info.longitude }}<br>
+
+		  <!-- Google Maps starts -->
+		  <iframe
+			  width="600"
+			  height="450"
+			  frameborder="0" style="border:0"
+			  src= "{{ query }}"  allowfullscreen>
+		  </iframe>
+
+		  <!-- Google Maps ends -->
+
+
                   <h2>KNN top 10 similar businesses</h2>
                   <form method="GET" action="/{{ rest_info.business_id }}/" target="_blank">
                      {% for s in similarity_types %}
@@ -212,6 +224,15 @@
          <!-- NETWORK VISUALIZATION-->
          <div class = 'row'>
             <h2>Network Analysis</h2>
+	     <form method="GET" action="/{{ rest_info.business_id }}/" target="_blank">
+ 		 <label for="sel1">Select a business:</label>
+  		 <select class="selectpicker" id="knn_business" name = "knn_business">
+			{% for r in knn_infos %}
+    		 	<option name = "knn_business" value = "{{ forloop.counter0 }}">({{ forloop.counter0 }}) {{ r.name }}</option>
+			{% endfor %}
+ 		 </select>
+                 <input type="submit" value="Submit">
+	     </form> 
             <div class = 'col-lg-12'>
                {% autoescape off %}{{ network_div }}{% endautoescape %}
             </div>
