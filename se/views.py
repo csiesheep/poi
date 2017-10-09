@@ -53,7 +53,7 @@ def create_network(nodes, edges):
 
 def draw_network(G):
     pos = nx.fruchterman_reingold_layout(G)
-    print pos
+#   print pos
 
     dmin=1
     ncenter=0
@@ -139,7 +139,20 @@ def detail(request, rest_id):
             s[2] = True
             break
 
-    knn_ids = [id_ for _, id_ in knn.get_knn(selected_sim_type, rest_id)]
+    approaches = [['hin2vec', 'HIN2Vec', False],
+                  ['deepwalk', 'DeepWalk', False],
+                  ['pte', 'PTE', False],
+                  ['esim', 'Esim', False]]
+    selected_approach = request.GET.get('approach', 'hin2vec')
+    for s in approaches:
+        if s[0] == selected_approach:
+            s[2] = True
+            break
+    print selected_sim_type, selected_approach
+
+    knn_ids = [id_ for _, id_ in knn.get_knn(selected_sim_type,
+                                             rest_id,
+                                             approach=selected_approach)]
     knn_infos = [business_coll.find_one({'business_id': id_})
                  for id_ in knn_ids]
     for b in knn_infos:
@@ -192,7 +205,7 @@ def detail(request, rest_id):
     rest_id1 = rest_info['business_id']
     rest_id2 = knn_ids[0]
     nodes, edges = graph_db.get_paths(rest_id1, rest_id2, 2)
-    print nodes, edges
+#   print nodes, edges
 
     if len(nodes) == 0:
         network_div = ''
@@ -216,12 +229,13 @@ def detail(request, rest_id):
                     'knn_infos':        knn_infos,
                     'knn_cat_dist':     knn_cat_dist,
                     'barchart_cat':     barchart_cat,
-                    'piechart_data_cat':    piechart_data_cat,
+                    'piechart_data_cat':piechart_data_cat,
                     'piechart_cat':     piechart_cat,
                     'knn_city_dist':    knn_city_dist,
                     'barchart_city':    barchart_city,
                     'piechart_city':    piechart_city,
                     'network_div':      network_div,
                     'similarity_types': similarity_types,
-                    'meta_paths': meta_paths,
+                    'approaches':       approaches,
+                    'meta_paths':       meta_paths,
                   })

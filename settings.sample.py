@@ -20,6 +20,7 @@ USER_COLL = 'user'
 REVIEW_COLL = 'review'
 TIP_COLL = 'tip'
 CHECKIN_COLL = 'checkin'
+#TODO refactor with SEQ2VEC_FILE
 VECTOR_COLL = 'vector'
 VECTOR_DEEPWALK_COLL = 'vector_deepwalk'
 VECTOR_PTE_COLL = 'vector_pte'

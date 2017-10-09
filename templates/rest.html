@@ -83,9 +83,21 @@
                   <b>Latitude: </b> {{ rest_info.latitude }}, <b>Longitude: </b>{{ rest_info.longitude }}<br>
                   <h2>KNN top 10 similar businesses</h2>
                   <form method="GET" action="/{{ rest_info.business_id }}/" target="_blank">
-                     {% for s in similarity_types %}
-                     <input type="radio" name="similarity" value="{{ s.0 }}" {% if s.2 %}checked{% endif %}> {{s.1}}
-                     {% endfor %}
+                      Similarity function: 
+                      <fieldset id="similarity">
+                         {% for s in similarity_types %}
+                         <input type="radio" name="similarity" value="{{ s.0 }}" {% if s.2 %}checked{% endif %}> {{s.1}}
+                         {% endfor %}
+                      </fieldset>
+                      <br>
+                      Learning approach: 
+                      <fieldset id="approach">
+                         {% for s in approaches %}
+                         <input type="radio" name="approach" value="{{ s.0 }}" {% if s.2 %}checked{% endif %}> {{s.1}}
+                         {% endfor %}
+                      </fieldset>
+                      <br>
+
                      <input type="submit" value="Submit">
                   </form>
                   <table>
