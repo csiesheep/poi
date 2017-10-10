@@ -10,7 +10,7 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-__author__ = 'sheep'
+__author__ = 'sheep', 'Licheng Jiang'
 
 ###################################################################
 # NOTICE:
@@ -245,6 +245,21 @@ def preprocess_review_text(review_text):
 
 ###################################################################
 # Added By: Licheng
+# Function Name: keyword_distribution_single_business
+# Description: calculate keyword TFIDF score
+# Parameter: id - a single business id
+#            processed_text - a preprocessed text string
+# Return: a sorted list with (keyword, TFIDF score) as element
+###################################################################
+def keyword_distribution_single_business(id, processed_text):
+    vectorizer = TfidfVectorizer(min_df=1)
+    vectorizer.fit_transform(processed_text)
+    idf = vectorizer.idf_
+    return sorted(dict(zip(vectorizer.get_feature_names(), idf)).items(), key=lambda x: x[1], reverse=True)
+
+
+###################################################################
+# Added By: Licheng
 # Function Name: keyword_distribution
 # Description: calculate keyword distribution based on the words
 #              with highest DFIDF score for each business id
@@ -256,10 +271,7 @@ def keyword_distribution(ids):
     processed_dict = extract_review_text(ids)
     keyword_dist = {}
     for id_ in ids:
-        vectorizer = TfidfVectorizer(min_df=1)
-        X = vectorizer.fit_transform(processed_dict[id_])
-        idf = vectorizer.idf_
-        word_score_list = sorted(dict(zip(vectorizer.get_feature_names(), idf)).items(), key=lambda x: x[1], reverse=True)
+        word_score_list = keyword_distribution_single_business(id_, processed_dict[id_])
         for word_tuple in word_score_list:
             if word_tuple[1] == word_score_list[0][1]:
                 if word_tuple[0] not in keyword_dist:
@@ -277,4 +289,3 @@ def pairwise_similarity_distribution(ids):
 #TODO
 def pairwise_co_customer_distribution(ids):
     pass
-
