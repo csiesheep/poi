@@ -9,8 +9,13 @@ from nltk.stem import PorterStemmer
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction import FeatureHasher
 
-__author__ = 'sheep', 'Licheng Jiang'
+
+
+__author__ = 'sheep', 'Licheng Jiang', 'Dan Colom'
 
 ###################################################################
 # NOTICE:
@@ -39,6 +44,8 @@ GEO_COORDS = 1
 # Function: Earth radius in km as constant
 ###################################################################
 EARTH_RADIUS = 6371
+
+BUSINESS_KEYWORD_COLL = 'business_keyword'
 
 
 ###################################################################
@@ -252,10 +259,100 @@ def preprocess_review_text(review_text):
 # Return: a sorted list with (keyword, TFIDF score) as element
 ###################################################################
 def keyword_distribution_single_business(id, processed_text):
-    vectorizer = TfidfVectorizer(min_df=1)
-    vectorizer.fit_transform(processed_text)
-    idf = vectorizer.idf_
-    return sorted(dict(zip(vectorizer.get_feature_names(), idf)).items(), key=lambda x: x[1], reverse=True)
+    #vectorizer = TfidfVectorizer(min_df=0)
+    #vectorizer.fit_transform(processed_text)
+    #idf = vectorizer.idf_
+    #return sorted(dict(zip(vectorizer.get_feature_names(), idf)).items(), key=lambda x: x[1], reverse=True)
+
+    tfidf_dict = {}
+    vectorizer = CountVectorizer()
+    x = vectorizer.fit_transform(processed_text)
+    words = vectorizer.get_feature_names()
+    counts = x.toarray()
+    transformer = TfidfTransformer(smooth_idf=False)
+    tfidf = transformer.fit_transform(counts)
+    for i in range(len(words)):
+        tfidf_dict[words[i]] = counts[0][i]
+    return sorted(tfidf_dict.items(), key=lambda x: x[1], reverse=True)
+
+
+
+
+###################################################################
+# Added By: Dan Colom
+# Modified By: Licheng Jiang
+# Function Name: get_top_keywords
+# Description: get the top k keywords for a business
+#              based on TFIDF scores
+# Parameter: dist - list of keywords distributions
+# 			 k - integer number of top keywords to return
+# Return: top_k - sorted list of top k keywords and their frequency
+###################################################################
+def get_top_keywords(dist, k):
+    top_k = []
+    for iter in range(k):
+        word = dist[iter][0]
+        top_k.append(word)
+    return top_k
+
+
+def get_top_keywords_single_review(id, k, review_text):
+    score_result = keyword_distribution_single_business(id, [review_text])
+    return get_top_keywords(score_result, k)
+
+
+def get_top_keywords_single_business(id, k):
+    group_list = []
+    merged_list = []
+    candidate_list = []
+    id_keyword_dist = {}
+    processed_dict = extract_review_text([id])
+    review_num = len(processed_dict[id])
+    for i in range(len(processed_dict[id])):
+        review_top_k = get_top_keywords_single_review(id, k, processed_dict[id][i])
+        merged_list += review_top_k
+        group_list.append(review_top_k)
+
+    for keyword in merged_list:
+        if keyword not in candidate_list and candidate_list.count(keyword) > 1:
+            candidate_list.append(keyword)
+    #print "candidate " + str(candidate_list)
+    if len(candidate_list) == 0:
+        for i in range(k):    # if all words are unique, return random top-k keywords by default
+            id_keyword_dist[merged_list[i]] = 1 * 1.0 / review_num
+    elif len(candidate_list) < k:
+        for keyword in candidate_list:
+            id_keyword_dist[keyword] = merged_list.count(keyword) * 1.0 / review_num
+        for i in range(k - len(candidate_list)):
+            for keyword in merged_list:
+                if keyword not in candidate_list and keyword not in id_keyword_dist.keys():
+                    id_keyword_dist[keyword] = 1.0 / review_num
+                    print keyword
+                    break
+    else:
+        for i in range(k):
+            for keyword in candidate_list:
+                #print keyword + " " + str(merged_list.count(keyword)) + " id_num " + str(id_num)
+                if keyword not in id_keyword_dist.keys():
+                    id_keyword_dist[keyword] = merged_list.count(keyword) * 1.0 / review_num
+                    break
+    db_writer(id, id_keyword_dist)
+    return id_keyword_dist.keys()
+
+
+def db_writer(id, keyword_dict):
+    client = mongodb_helper.get_client()
+    business_keyword_coll = client[settings.DB_NAME][BUSINESS_KEYWORD_COLL]
+    keywords_dict_list = []
+    keywords_list = keyword_dict.keys()
+    keywords_score_list = keyword_dict.values()
+    for i in range(len(keywords_list)):
+        keywords_dict_list.append({'word':keywords_list[i], 'weight':keywords_score_list[i]})
+    data = {'id': id, 'keywords':keywords_dict_list}
+    business_keyword_coll.insert_one(data)
+    business_keyword_coll_1 = mongodb_helper.get_coll(BUSINESS_KEYWORD_COLL)
+    print business_keyword_coll_1.find_one({'id': id})['id']
+
 
 
 ###################################################################
@@ -267,17 +364,40 @@ def keyword_distribution_single_business(id, processed_text):
 # Return: a sorted dictionary with keyword as key and its frequency
 #         in reviews of listed business ids
 ###################################################################
-def keyword_distribution(ids):
-    processed_dict = extract_review_text(ids)
+def keyword_distribution(ids, k):
+    group_list = []
+    merged_list = []
+    candidate_list = []
+    id_num = len(ids)
     keyword_dist = {}
     for id_ in ids:
-        word_score_list = keyword_distribution_single_business(id_, processed_dict[id_])
-        for word_tuple in word_score_list:
-            if word_tuple[1] == word_score_list[0][1]:
-                if word_tuple[0] not in keyword_dist:
-                    keyword_dist[word_tuple[0]] = 1.0/len(ids)
-                    continue
-                keyword_dist[word_tuple[0]] += 1.0/len(ids)
+        single_top_k = get_top_keywords_single_business(id_, k)
+        #print "single " + str(single_top_k)
+        group_list.append(single_top_k)
+        merged_list += single_top_k
+    for keyword in merged_list:
+        if keyword not in candidate_list and candidate_list.count(keyword) > 1:
+            candidate_list.append(keyword)
+    #print "candidate " + str(candidate_list)
+    if len(candidate_list) == 0:
+        for i in range(k):    # if all words are unique, return random top-k keywords by default
+            keyword_dist[merged_list[i]] = 1 * 1.0 / id_num
+    elif len(candidate_list) < k:
+        for keyword in candidate_list:
+            keyword_dist[keyword] = merged_list.count(keyword) * 1.0 / id_num
+        for i in range(k - len(candidate_list)):
+            for keyword in merged_list:
+                if keyword not in candidate_list and keyword not in keyword_dist.keys():
+                    keyword_dist[keyword] = 1.0 / id_num
+                    print keyword
+                    break
+    else:
+        for i in range(k):
+            for keyword in candidate_list:
+                #print keyword + " " + str(merged_list.count(keyword)) + " id_num " + str(id_num)
+                if keyword not in keyword_dist.keys():
+                    keyword_dist[keyword] = merged_list.count(keyword) * 1.0 / id_num
+                    break
     return sorted(keyword_dist.items(), key=lambda x: x[1], reverse=True)
 
 
@@ -289,3 +409,8 @@ def pairwise_similarity_distribution(ids):
 #TODO
 def pairwise_co_customer_distribution(ids):
     pass
+
+
+# TEST CASE
+#print keyword_distribution(["cdk-qqJ71q6P7TJTww_DSA", "0DI8Dt2PJp07XkVvIElIcQ", "LTlCaCGZE14GuaUXUGbamg","EDqCEAGXVGCH4FJXgqtjqg", "Cu4_Fheh7IrzGiK-Pc79ig"], 5)
+#print get_top_keywords_single_business("cdk-qqJ71q6P7TJTww_DSA", 5)
