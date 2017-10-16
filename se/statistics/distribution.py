@@ -208,10 +208,20 @@ def extract_review_text(ids):
         result = review_coll.find({'business_id': id_})
         for record in result:
             original_text = record['text']
-            processed_text = preprocess_review_text(original_text)
-            review_text_list.append(processed_text)
+            #processed_text = preprocess_review_text(original_text)
+            #review_text_list.append(processed_text)
+            review_text_list.append(original_text)
         result_dict[id_] = review_text_list
     return result_dict
+
+
+def extract_all_review():
+    review_coll = mongodb_helper.get_coll(settings.REVIEW_COLL)
+    a = review_coll.find({})
+    text_lists = []
+    for record in a:
+        text_lists.append(record['text'])
+    return text_lists
 
 
 ###################################################################
@@ -258,24 +268,17 @@ def preprocess_review_text(review_text):
 #            processed_text - a preprocessed text string
 # Return: a sorted list with (keyword, TFIDF score) as element
 ###################################################################
-def keyword_distribution_single_business(id, processed_text):
-    #vectorizer = TfidfVectorizer(min_df=0)
-    #vectorizer.fit_transform(processed_text)
-    #idf = vectorizer.idf_
-    #return sorted(dict(zip(vectorizer.get_feature_names(), idf)).items(), key=lambda x: x[1], reverse=True)
-
-    tfidf_dict = {}
+def keyword_distribution_single_business(text):
     vectorizer = CountVectorizer()
-    x = vectorizer.fit_transform(processed_text)
+    x = vectorizer.fit_transform(text)
     words = vectorizer.get_feature_names()
     counts = x.toarray()
+
     transformer = TfidfTransformer(smooth_idf=False)
     tfidf = transformer.fit_transform(counts)
-    for i in range(len(words)):
-        tfidf_dict[words[i]] = counts[0][i]
-    return sorted(tfidf_dict.items(), key=lambda x: x[1], reverse=True)
+    scores = tfidf.toarray()
 
-
+    return (words, counts, scores)
 
 
 ###################################################################
@@ -296,12 +299,20 @@ def get_top_keywords(dist, k):
     return top_k
 
 
-def get_top_keywords_single_review(id, k, review_text):
-    score_result = keyword_distribution_single_business(id, [review_text])
+def get_top_keywords_single_review(k, review_text, word_count_score_tuple, all_text):
+    words = word_count_score_tuple[0]
+    counts = word_count_score_tuple[1]
+    scores = word_count_score_tuple[2]
+    tfidf_dict = {}
+    index = all_text.index(review_text)
+    for i in range(len(words)):
+        if counts[index][i] != 0:
+            tfidf_dict[words[i]] = scores[index][i]
+    score_result = sorted(tfidf_dict.items(), key=lambda x: x[1], reverse=True)
     return get_top_keywords(score_result, k)
 
 
-def get_top_keywords_single_business(id, k):
+def top_keywords_single_business_auxiliary(id, k, word_count_score_tuple, all_text):
     group_list = []
     merged_list = []
     candidate_list = []
@@ -309,16 +320,15 @@ def get_top_keywords_single_business(id, k):
     processed_dict = extract_review_text([id])
     review_num = len(processed_dict[id])
     for i in range(len(processed_dict[id])):
-        review_top_k = get_top_keywords_single_review(id, k, processed_dict[id][i])
+        review_top_k = get_top_keywords_single_review(k, processed_dict[id][i], word_count_score_tuple, all_text)
         merged_list += review_top_k
         group_list.append(review_top_k)
 
     for keyword in merged_list:
         if keyword not in candidate_list and candidate_list.count(keyword) > 1:
             candidate_list.append(keyword)
-    #print "candidate " + str(candidate_list)
     if len(candidate_list) == 0:
-        for i in range(k):    # if all words are unique, return random top-k keywords by default
+        for i in range(k):  # if all words are unique, return random top-k keywords by default
             id_keyword_dist[merged_list[i]] = 1 * 1.0 / review_num
     elif len(candidate_list) < k:
         for keyword in candidate_list:
@@ -327,16 +337,26 @@ def get_top_keywords_single_business(id, k):
             for keyword in merged_list:
                 if keyword not in candidate_list and keyword not in id_keyword_dist.keys():
                     id_keyword_dist[keyword] = 1.0 / review_num
-                    print keyword
                     break
     else:
         for i in range(k):
             for keyword in candidate_list:
-                #print keyword + " " + str(merged_list.count(keyword)) + " id_num " + str(id_num)
                 if keyword not in id_keyword_dist.keys():
                     id_keyword_dist[keyword] = merged_list.count(keyword) * 1.0 / review_num
                     break
     db_writer(id, id_keyword_dist)
+    return id_keyword_dist
+
+
+def get_top_keywords_single_business(id, k, word_count_score_tuple, all_text):
+    id_keyword_dist = top_keywords_single_business_auxiliary(id, k, word_count_score_tuple, all_text)
+    return id_keyword_dist.keys()
+
+
+def independent_get_top_keywords_single_business(id, k):
+    all_text = extract_all_review()
+    word_count_score_tuple = keyword_distribution_single_business(all_text)
+    id_keyword_dist = top_keywords_single_business_auxiliary(id, k, word_count_score_tuple, all_text)
     return id_keyword_dist.keys()
 
 
@@ -350,8 +370,6 @@ def db_writer(id, keyword_dict):
         keywords_dict_list.append({'word':keywords_list[i], 'weight':keywords_score_list[i]})
     data = {'id': id, 'keywords':keywords_dict_list}
     business_keyword_coll.insert_one(data)
-    business_keyword_coll_1 = mongodb_helper.get_coll(BUSINESS_KEYWORD_COLL)
-    print business_keyword_coll_1.find_one({'id': id})['id']
 
 
 
@@ -369,16 +387,16 @@ def keyword_distribution(ids, k):
     merged_list = []
     candidate_list = []
     id_num = len(ids)
+    all_text = extract_all_review()
+    word_count_score_tuple = keyword_distribution_single_business(all_text)
     keyword_dist = {}
     for id_ in ids:
-        single_top_k = get_top_keywords_single_business(id_, k)
-        #print "single " + str(single_top_k)
+        single_top_k = get_top_keywords_single_business(id_, k, word_count_score_tuple, all_text)
         group_list.append(single_top_k)
         merged_list += single_top_k
     for keyword in merged_list:
         if keyword not in candidate_list and candidate_list.count(keyword) > 1:
             candidate_list.append(keyword)
-    #print "candidate " + str(candidate_list)
     if len(candidate_list) == 0:
         for i in range(k):    # if all words are unique, return random top-k keywords by default
             keyword_dist[merged_list[i]] = 1 * 1.0 / id_num
@@ -394,7 +412,6 @@ def keyword_distribution(ids, k):
     else:
         for i in range(k):
             for keyword in candidate_list:
-                #print keyword + " " + str(merged_list.count(keyword)) + " id_num " + str(id_num)
                 if keyword not in keyword_dist.keys():
                     keyword_dist[keyword] = merged_list.count(keyword) * 1.0 / id_num
                     break
@@ -412,5 +429,6 @@ def pairwise_co_customer_distribution(ids):
 
 
 # TEST CASE
-#print keyword_distribution(["cdk-qqJ71q6P7TJTww_DSA", "0DI8Dt2PJp07XkVvIElIcQ", "LTlCaCGZE14GuaUXUGbamg","EDqCEAGXVGCH4FJXgqtjqg", "Cu4_Fheh7IrzGiK-Pc79ig"], 5)
+#print keyword_distribution(["cdk-qqJ71q6P7TJTww_DSA", "0DI8Dt2PJp07XkVvIElIcQ", "LTlCaCGZE14GuaUXUGbamg","EDqCEAGXVGCH4FJXgqtjqg", "Cu4_Fheh7IrzGiK-Pc79ig"], 10)
 #print get_top_keywords_single_business("cdk-qqJ71q6P7TJTww_DSA", 5)
+#print len(extract_all_review())
