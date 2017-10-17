@@ -83,14 +83,35 @@
                   <b>Latitude: </b> {{ rest_info.latitude }}, <b>Longitude: </b>{{ rest_info.longitude }}<br>
 
 		  <!-- Google Maps starts -->
+		  <!--
 		  <iframe
 			  width="600"
 			  height="450"
 			  frameborder="0" style="border:0"
 			  src= "{{ query }}"  allowfullscreen>
 		  </iframe>
+		  -->
 
 		  <!-- Google Maps ends -->
+
+		<div id="map" style="width:100%;height:500px"></div>
+
+		<script>
+		function myMap() {
+		  var myCenter = new google.maps.LatLng(51.508742,-0.120850);
+		  var mapCanvas = document.getElementById("map");
+		  var mapOptions = {center: myCenter, zoom: 5};
+		  var map = new google.maps.Map(mapCanvas, mapOptions);
+		  var marker = new google.maps.Marker({position:myCenter,map: map});
+                  {% for lon, lat in knn_lon_lat %}
+		  var myCenter2 = new google.maps.LatLng({{ lon }}, {{ lat }});
+		  var marker = new google.maps.Marker({position:myCenter2,map: map});
+                  {% endfor %}
+		  marker.setMap(map);
+		}
+		</script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key= AIzaSyDCvsEJts9_UH5J3dADgPUMi9Xu9djEGew&callback=myMap"></script>		  
 
 
                   <h2>KNN top 10 similar businesses</h2>
@@ -240,17 +261,33 @@
             <h2>Network Analysis</h2>
 	     <form method="GET" action="/{{ rest_info.business_id }}/" target="_blank">
  		 <label for="sel1">Select a business:</label>
-  		 <select class="selectpicker" id="knn_business" name = "knn_business">
+  		 <select class="selectpicker" id="knn_business" name = "knn_business" multiple>
 			{% for r in knn_infos %}
     		 	<option name = "knn_business" value = "{{ forloop.counter0 }}">({{ forloop.counter0 }}) {{ r.name }}</option>
 			{% endfor %}
  		 </select>
                  <input type="submit" value="Submit">
 	     </form> 
-            <div class = 'col-lg-12'>
-               {% autoescape off %}{{ network_div }}{% endautoescape %}
+         </div> 
+         
+         {% for d in network_div %}
+         <input type='button' value = "{{ forloop.counter }}" onclick = "myFunction('network_{{ forloop.counter0 }}')"/>
+            {{ d.0 }} <br/>
+         <div class = 'row' id = "network_{{ forloop.counter0 }}" style = 'height:500px;display:block;'>
+            <div class = 'col-lg-8' >
+               {% autoescape off %}{{ d.1 }}{% endautoescape %}
             </div>
+            <div class = 'col-lg-4'>
+	    <h4>Meta-path count</h4>
+	       {% for meta_path in d.2 %}
+	            <b>{{ meta_path.0 }}</b>: {{ meta_path.1 }} <br>
+	       {% endfor %}
+            </div>            
          </div>
+         {% endfor %}
+            
+
+            
       </div>
       <!-- jQuery -->
       <script src="{% static "poi/jquery.min.js" %}"></script>
@@ -284,11 +321,6 @@
              $(window).focus();
          }
       </script>
-
-<h2>Meta-path count</h2><br>
-{% for meta_path in meta_paths %}
-<b>{{ meta_path.0 }}</b>: {{ meta_path.1 }} <br>
-{% endfor %}
 
    </body>
 </html>

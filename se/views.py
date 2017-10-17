@@ -106,8 +106,6 @@ def draw_network(G):
 
     fig = go.Figure(data=go.Data([edge_trace, node_trace]),
                     layout=go.Layout(
-                        title='Sub-network between two restaurants',
-                        titlefont=dict(size=16),
                         showlegend=False,
                         hovermode='closest',
                         margin=dict(b=20,l=5,r=5,t=40),
@@ -167,6 +165,11 @@ def detail(request, rest_id):
         b['co_user_ratio'] = co_customers.get_ratio_com_customers(rest_id,
                                                           b['business_id'])
         b['score'] = knn_result[ith][0]
+   
+    knn_lon_lat = []
+    for row in knn_infos:
+        knn_lon_lat.append([row['longitude'], row['latitude']])
+    print knn_lon_lat
 
     categories = rest_info['categories']
     knn_cat_dist = []
@@ -216,24 +219,27 @@ def detail(request, rest_id):
 #            4: {"name": "Anthony",    "type": "user"}}
     
     # network generation
-
+    #meta_paths = []
+    network_div = []
     rest_id1 = rest_info['business_id']
-    rest_id2 = knn_ids[int(request.GET.get('knn_business', 0))]
-    meta_paths = graph_db.get_meta_path_count(rest_id1, rest_id2, 2)
-    temp_ = []
-    for mp, count in sorted(meta_paths.items(), key=lambda x: len(x[0])):
-        temp_.append(('B-%s-B' % ('-'.join(mp)), count))
-    meta_paths = temp_
+    for i in range(10):
+        rest_id2 = knn_ids[i]
+        meta_paths_tmp = graph_db.get_meta_path_count(rest_id1, rest_id2, 2)
+        temp_ = []
+        for mp, count in sorted(meta_paths_tmp.items(), key=lambda x: len(x[0])):
+            temp_.append(('B-%s-B' % ('-'.join(mp)), count))
+        meta_paths = temp_
 
-    nodes, edges = graph_db.get_paths(rest_id1, rest_id2, 2)
-    print nodes, edges
+        nodes, edges = graph_db.get_paths(rest_id1, rest_id2, 2)
+        print nodes, edges
 
-    if len(nodes) == 0:
-        network_div = ''
-    else:
-        G = create_network(nodes, edges)
-        network_div = draw_network(G)
+        if len(nodes) == 0:
+            network_div.append([rest_info["name"] + " v.s. " + knn_infos[i]["name"], '', meta_paths])
+        else:
+            G = create_network(nodes, edges)
+            network_div.append([rest_info["name"] + " v.s. " + knn_infos[i]["name"], draw_network(G), meta_paths])
 
+    # added knn_lon_lat for google map display
     return render(request,
                   'rest.html',
                   {
@@ -242,6 +248,7 @@ def detail(request, rest_id):
  		    'query':            query,
                     'knn_infos':        knn_infos,
                     'knn_cat_dist':     knn_cat_dist,
+                    'knn_lon_lat' :     knn_lon_lat,
                     'barchart_cat':     barchart_cat,
                     'piechart_data_cat':piechart_data_cat,
                     'piechart_cat':     piechart_cat,
@@ -251,5 +258,4 @@ def detail(request, rest_id):
                     'network_div':      network_div,
                     'similarity_types': similarity_types,
                     'approaches':       approaches,
-                    'meta_paths':       meta_paths,
                   })
