@@ -16,6 +16,7 @@ DB_PORT = None
 DB_NAME = 'yelp_test'
 
 BUSINESS_COLL = 'business'
+BUSINESS_KEYWORD_COLL = 'business_keyword'
 USER_COLL = 'user'
 REVIEW_COLL = 'review'
 TIP_COLL = 'tip'

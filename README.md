@@ -12,6 +12,7 @@
     $sudo pip install networkx
     $sudo pip install py2neo
     $sudo pip install nltk
+    $sudo pip install numpy
     $sudo pip install sklearn
     $sudo pip install scipy
 
@@ -80,6 +81,19 @@
 
         $python db/importer.py
 
+    5.4 Extract restaurant keywords
+
+        5.4.1 Download necessary dictionaries
+
+            # in python shell
+            $import nltk
+            $nltk.download('stopwords')
+            $nltk.download('punkt')
+
+        5.4.2 Extract restaurant keywords
+
+            $python tools/extract_keywords.py <k>
+        
 
 6. Build up the search engine
 
