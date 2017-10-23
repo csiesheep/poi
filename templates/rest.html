@@ -98,20 +98,22 @@
 
 		<script>
 		function myMap() {
-		  var myCenter = new google.maps.LatLng(51.508742,-0.120850);
+                  {%for info in knn_lon_lat%}
+		  var myCenter{{forloop.counter0}} = new google.maps.LatLng({{ info.1 }},{{ info.0 }});
+
+                  {%endfor%}
 		  var mapCanvas = document.getElementById("map");
-		  var mapOptions = {center: myCenter, zoom: 5};
+		  var mapOptions = {center: myCenter0, zoom: 5};
 		  var map = new google.maps.Map(mapCanvas, mapOptions);
-		  var marker = new google.maps.Marker({position:myCenter,map: map});
-                  {% for lon, lat in knn_lon_lat %}
-		  var myCenter2 = new google.maps.LatLng({{ lon }}, {{ lat }});
-		  var marker = new google.maps.Marker({position:myCenter2,map: map});
-                  {% endfor %}
+	          {%for info in knn_lon_lat%}
+		  var marker{{forloop.counter0}} = new google.maps.Marker({position:myCenter{{forloop.counter0}},map:map});
+		  {%endfor%}
+
 		  marker.setMap(map);
 		}
 		</script>
 
-<script src="https://maps.googleapis.com/maps/api/js?key= AIzaSyDCvsEJts9_UH5J3dADgPUMi9Xu9djEGew&callback=myMap"></script>		  
+<script src="https://maps.googleapis.com/maps/api/js?key= AIzaSyDdTuGBGV6SmUI4zCAhKGvDSLn7ZtdT6JA&callback=myMap"></script>		  
 
 
                   <h2>KNN top 10 similar businesses</h2>
