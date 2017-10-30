@@ -102,9 +102,12 @@
 		  var myCenter{{forloop.counter0}} = new google.maps.LatLng({{ info.1 }},{{ info.0 }});
 
                   {%endfor%}
+		  var myCenter = new google.maps.LatLng({{ rest_info.latitude }},{{ rest_info.longitude }});
 		  var mapCanvas = document.getElementById("map");
-		  var mapOptions = {center: myCenter0, zoom: 5};
+		  var mapOptions = {center: myCenter, zoom: 14};
 		  var map = new google.maps.Map(mapCanvas, mapOptions);
+		  var image = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
+		  var marker = new google.maps.Marker({position:myCenter,map:map,icon:image});
 	          {%for info in knn_lon_lat%}
 		  var marker{{forloop.counter0}} = new google.maps.Marker({position:myCenter{{forloop.counter0}},map:map});
 		  {%endfor%}
