@@ -11,7 +11,7 @@ from se.similarity import knn
 from se.similarity import co_customers
 import settings
 from se.statistics import distribution
-
+from se import views_helper
 
 
 __author__ = 'sheep'
@@ -151,7 +151,6 @@ def detail(request, rest_id):
         if s[0] == selected_approach:
             s[2] = True
             break
-    print selected_sim_type, selected_approach
 
     knn_result = knn.get_knn(selected_sim_type,
                              rest_id,
@@ -165,11 +164,20 @@ def detail(request, rest_id):
         b['co_user_ratio'] = co_customers.get_ratio_com_customers(rest_id,
                                                           b['business_id'])
         b['score'] = knn_result[ith][0]
-   
+
+    rest_info['keywords'] = views_helper.get_keywords(rest_id)
+#   for kth_info in knn_infos:
+#       kth_info['keywords'] = views_helper.get_keywords(kth_info['business_id'])
+    knn_keyword_dist = []
+    for word, score in distribution.keyword_distribution(knn_ids):
+        if word in rest_info['keywords']:
+            knn_keyword_dist.append((word, score, True))
+            continue
+        knn_keyword_dist.append((word, score, False))
+
     knn_lon_lat = []
     for row in knn_infos:
         knn_lon_lat.append([row['longitude'], row['latitude']])
-    print knn_lon_lat
 
     categories = rest_info['categories']
     knn_cat_dist = []
@@ -231,7 +239,6 @@ def detail(request, rest_id):
         meta_paths = temp_
 
         nodes, edges = graph_db.get_paths(rest_id1, rest_id2, 2)
-        print nodes, edges
 
         if len(nodes) == 0:
             network_div.append([rest_info["name"] + " v.s. " + knn_infos[i]["name"], '', meta_paths])
@@ -245,9 +252,10 @@ def detail(request, rest_id):
                   {
                     'rest_info':        rest_info,
                     'rest_vec':         rest_vec,
- 		    'query':            query,
+                    'query':            query,
                     'knn_infos':        knn_infos,
                     'knn_cat_dist':     knn_cat_dist,
+                    'knn_keyword_dist': knn_keyword_dist,
                     'knn_lon_lat' :     knn_lon_lat,
                     'barchart_cat':     barchart_cat,
                     'piechart_data_cat':piechart_data_cat,

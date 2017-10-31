@@ -12,6 +12,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction import FeatureHasher
+from se import views_helper
 
 
 
@@ -149,6 +150,12 @@ def category_distribution(ids):
     cat_dist = calc_distribution(data_list, len(ids))
     return sorted(cat_dist.items(), key=lambda x: x[1], reverse=True)  # PASS TEST
 
+def keyword_distribution(ids):
+    keywords = []
+    for id_ in ids:
+        keywords.extend(views_helper.get_keywords(id_))
+    cat_dist = calc_distribution(keywords, len(ids))
+    return sorted(cat_dist.items(), key=lambda x: x[1], reverse=True)  # PASS TEST
 
 ###################################################################
 # Added By: Licheng
@@ -382,40 +389,40 @@ def db_writer(id, keyword_dict):
 # Return: a sorted dictionary with keyword as key and its frequency
 #         in reviews of listed business ids
 ###################################################################
-def keyword_distribution(ids, k):
-    group_list = []
-    merged_list = []
-    candidate_list = []
-    id_num = len(ids)
-    all_text = extract_all_review()
-    word_count_score_tuple = keyword_distribution_single_business(all_text)
-    keyword_dist = {}
-    for id_ in ids:
-        single_top_k = get_top_keywords_single_business(id_, k, word_count_score_tuple, all_text)
-        group_list.append(single_top_k)
-        merged_list += single_top_k
-    for keyword in merged_list:
-        if keyword not in candidate_list and candidate_list.count(keyword) > 1:
-            candidate_list.append(keyword)
-    if len(candidate_list) == 0:
-        for i in range(k):    # if all words are unique, return random top-k keywords by default
-            keyword_dist[merged_list[i]] = 1 * 1.0 / id_num
-    elif len(candidate_list) < k:
-        for keyword in candidate_list:
-            keyword_dist[keyword] = merged_list.count(keyword) * 1.0 / id_num
-        for i in range(k - len(candidate_list)):
-            for keyword in merged_list:
-                if keyword not in candidate_list and keyword not in keyword_dist.keys():
-                    keyword_dist[keyword] = 1.0 / id_num
-                    print keyword
-                    break
-    else:
-        for i in range(k):
-            for keyword in candidate_list:
-                if keyword not in keyword_dist.keys():
-                    keyword_dist[keyword] = merged_list.count(keyword) * 1.0 / id_num
-                    break
-    return sorted(keyword_dist.items(), key=lambda x: x[1], reverse=True)
+#ef keyword_distribution(ids, k):
+#   group_list = []
+#   merged_list = []
+#   candidate_list = []
+#   id_num = len(ids)
+#   all_text = extract_all_review()
+#   word_count_score_tuple = keyword_distribution_single_business(all_text)
+#   keyword_dist = {}
+#   for id_ in ids:
+#       single_top_k = get_top_keywords_single_business(id_, k, word_count_score_tuple, all_text)
+#       group_list.append(single_top_k)
+#       merged_list += single_top_k
+#   for keyword in merged_list:
+#       if keyword not in candidate_list and candidate_list.count(keyword) > 1:
+#           candidate_list.append(keyword)
+#   if len(candidate_list) == 0:
+#       for i in range(k):    # if all words are unique, return random top-k keywords by default
+#           keyword_dist[merged_list[i]] = 1 * 1.0 / id_num
+#   elif len(candidate_list) < k:
+#       for keyword in candidate_list:
+#           keyword_dist[keyword] = merged_list.count(keyword) * 1.0 / id_num
+#       for i in range(k - len(candidate_list)):
+#           for keyword in merged_list:
+#               if keyword not in candidate_list and keyword not in keyword_dist.keys():
+#                   keyword_dist[keyword] = 1.0 / id_num
+#                   print keyword
+#                   break
+#   else:
+#       for i in range(k):
+#           for keyword in candidate_list:
+#               if keyword not in keyword_dist.keys():
+#                   keyword_dist[keyword] = merged_list.count(keyword) * 1.0 / id_num
+#                   break
+#   return sorted(keyword_dist.items(), key=lambda x: x[1], reverse=True)
 
 
 #TODO

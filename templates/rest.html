@@ -79,6 +79,7 @@
                   <b>Stars:</b> {{ rest_info.stars }}<br>
                   <b>Address:</b> {{ rest_info.address }}, {{ rest_info.city }}<br>
                   <b>Categories:</b> <input type="text" value="{{ rest_info.categories|join:', '}}" data-role="tagsinput" class="form-control" />
+                  <b>Keywords:</b> <input type="text" value="{{ rest_info.keywords|join:', '}}" data-role="tagsinput" class="form-control" />
                   <br>
                   <b>Latitude: </b> {{ rest_info.latitude }}, <b>Longitude: </b>{{ rest_info.longitude }}<br>
 
@@ -179,6 +180,56 @@
                                        </thead>
                                        <tbody>
                                           {% for c in knn_cat_dist %}
+                                          <tr>
+                                             {% if c.2 %}
+                                             <td><font color="red">{{ c.0 }}</font></td>
+                                             <td>{{ c.1 }}</td>
+                                             {% else %}
+                                             <td>{{ c.0 }}</td>
+                                             <td>{{ c.1 }}</td>
+                                             {% endif %}
+                                          </tr>
+                                          {% endfor %}
+                                       </tbody>
+                                    </table>
+                                 </div>
+                              </div>
+                           </div>
+                           <div id="cat_bar" class="tab-pane">
+                              <div class = "row">
+                                 {% autoescape off %}{{ barchart_cat }}{% endautoescape %}
+                              </div>
+                           </div>
+                           <div id="cat_pie" class="tab-pane">
+                              {% autoescape off %}{{ piechart_cat }}{% endautoescape %}
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <div class="col-lg-12">
+                  <h3>Keyword Distribution</h3>
+                  <div class="panel panel-default">
+                     <div class="panel-body" id="panel-body">
+                        <ul class="nav nav-tabs">
+                           <li class="active"><a href="#cat_table" data-toggle="tab" onclick="resizeWin()">Table</a></li>
+                           <li><a href="#cat_bar" data-toggle="tab" onclick="resizeWin()">Bar</a></li>
+                           <li><a href="#cat_pie" data-toggle="tab" onclick="resizeWin()">Pie</a></li>
+                        </ul>
+                        <div class="tab-content" style="height: 500px;">
+                           <div id="a" class="tab-pane active" style="z-index:-1;">
+                              <div class = "row">
+                                 <div id="cat_table" class="col-lg-4" style="overflow: auto;height: 500px;">
+                                    <table class="table table-striped" >
+                                       <thead>
+                                          <tr>
+                                             <th>Keyword</th>
+                                             <th>Ratio</th>
+                                          </tr>
+                                       </thead>
+                                       <tbody>
+                                          {% for c in knn_keyword_dist %}
                                           <tr>
                                              {% if c.2 %}
                                              <td><font color="red">{{ c.0 }}</font></td>
