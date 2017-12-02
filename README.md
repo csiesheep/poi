@@ -44,22 +44,22 @@
       Download yelp datasets from https://www.yelp.com/dataset/download
       Update settings.py
         
-            `BUSINESS_FILE, USER_FILE, REVIEW_FILE, TIP_FILE, CHECKIN_FILE`
+            BUSINESS_FILE, USER_FILE, REVIEW_FILE, TIP_FILE, CHECKIN_FILE
 
     4.2 Prepare vector files and update settings.py
 
       Ask the administrator for vector files
       Update settings.py
 
-            `SEQ2ID_FILE, SEQ2VEC_FILE`
+            SEQ2ID_FILE, SEQ2VEC_FILE
 
     4.3 Prepare files for search engine
 
       Update indexing file name in settings.py
 
-        `INDEXING_FILE`
+        INDEXING_FILE
 
-        `$python tools/prepare_dataset_for_indexing.py`
+        $python tools/prepare_dataset_for_indexing.py
 
 
 
@@ -87,8 +87,7 @@
 
     5.4 Extract restaurant keywords
 
-        5.4.1 Download necessary dictionaries
-
+      5.4.1 Download necessary dictionaries
             In Python shell,
             ```
             >>> import nltk
@@ -96,7 +95,7 @@
             >>> nltk.download('punkt')
             ```
 
-        5.4.2 Extract restaurant keywords
+      5.4.2 Extract restaurant keywords
 
             `$python tools/extract_keywords.py <k>`
         
