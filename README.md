@@ -26,7 +26,8 @@
 
 3. Setup PYTHONPATH
 
-    In the repository folder
+    In the repository folder:
+    
     For Linux
     ```$export PYTHONPATH=`pwd` ```
 
@@ -40,23 +41,23 @@
 
     4.1 Prepare yelp datasets and update settings.py
 
-        Donwload yelp datasets from https://www.yelp.com/dataset/download
-        Update settings.py
+      Download yelp datasets from https://www.yelp.com/dataset/download
+      Update settings.py
         
             `BUSINESS_FILE, USER_FILE, REVIEW_FILE, TIP_FILE, CHECKIN_FILE`
 
     4.2 Prepare vector files and update settings.py
 
-        Ask the administrator for vector files
-        Update settings.py
+      Ask the administrator for vector files
+      Update settings.py
 
             `SEQ2ID_FILE, SEQ2VEC_FILE`
 
     4.3 Prepare files for search engine
 
-        Update indexing file name in setting.py
+      Update indexing file name in settings.py
 
-            `INDEXING_FILE`
+        `INDEXING_FILE`
 
         `$python tools/prepare_dataset_for_indexing.py`
 
@@ -112,21 +113,21 @@
 
     6.1 Install solr (search engine)
 
-        Download solr from http://apache.claz.org/lucene/solr/6.6.1/
-        Tutorial of solr: http://lucene.apache.org/solr/quickstart.html
+      Download solr from http://apache.claz.org/lucene/solr/6.6.1/
+      Tutorial of solr: http://lucene.apache.org/solr/quickstart.html
 
     6.2 Start solr
 
-        `$<solr folder>/bin/solr start -h <host> -p <post>`
+      `$<solr folder>/bin/solr start -h <host> -p <post>`
 
     6.3 Built solr search engine
 
-        `$<solr folder>/bin/solr create -c <core_name>`
-        `$<solr folder>/bin/post -h <host> -p <post> -c <core_name> <INDEXING_FILE in settings.py>`
+      `$<solr folder>/bin/solr create -c <core_name>`
+      `$<solr folder>/bin/post -h <host> -p <post> -c <core_name> <INDEXING_FILE in settings.py>`
 
     6.4 Delete all data from solr search engine
 
-        `$curl "http://<host>:<port>/solr/<core>/update?stream.body=<delete><query>*:*</query></delete>&commit=true"`
+      `$curl "http://<host>:<port>/solr/<core>/update?stream.body=<delete><query>*:*</query></delete>&commit=true"`
 
 7. Build up the graph database
 
