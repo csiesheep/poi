@@ -77,37 +77,99 @@ def get_paths(rest_id1, rest_id2, k):
     return nodes, edges
 
 def get_meta_path_count(rest_id1, rest_id2, k):
+    
+    client = Neo4j_helper.get_client()
+    meta_graph = {}
+    Type = 'UCL'
+    
+    def set_path_count(T, N):
+        query = ('MATCH path=(S:B {id:"%s"})-%s-(E:U {id:"%s"}) '
+                 'RETURN DISTINCT count(path)'
+                 '' % (rest_id1, N, rest_id2))
+        num = graph.run(query).evaluate()
+        T += ('B',)
+        meta_graph[T] = num
+        
     for kth in range(1, k+1):
         nodeString = '[]'
-        typeStringU = ('B','U',)
-        c = list(string.ascii_lowercase) # get a list of lowercase alphabets
-        # construct partial strings to query
-        for i in range(kth):
-            nodeString += ('-(%s)-[]' % c[i])
-        # query for number of paths
-        queryU = ('MATCH path=(S:B {id:"%s"})-%s-(E:U {id:"%s"}) '
-             'RETURN DISTINCT count(path)'
-             '' % (rest_id1, nodeString, rest_id2))
-        queryC = ('MATCH path=(S:B {id:"%s"})-[]-(X)-[]-(E:U {id:"%s"}) '
-             'WHERE (X: C)'
-             'RETURN DISTINCT count(path)'
-             '' % (rest_id1, rest_id2))
-        queryL = ('MATCH path=(S:B {id:"%s"})-[]-(X)-[]-(E:U {id:"%s"}) '
-             'WHERE (X: L)'
-             'RETURN DISTINCT count(path)'
-             '' % (rest_id1, rest_id2))
-        numU = graph.run(queryU).evaluate()
-        numC = graph.run(queryC).evaluate()
-        numL = graph.run(queryL).evaluate()
-        # construct partial string into metagraph as types
-        for i in range(kth-1):
-            typeStringU += ('U',)
-        typeStringU += ('B',)
-        meta_graph[typeStringU] = numU
-        meta_graph['B','C','B'] = numC
-        meta_graph['B','L','B'] = numL
+        typeString = ('B',)
+        if kth == 2:
+            nodeString += ('-(:U)-[]-(:U)-[]')
+            typeString += ('U','U',)
+            set_path_count(typeString, nodeString)
+        else:
+            for a in Type:
+                nodeString = '[]'
+                typeString = ('B',)
+                typeString += (a,)
+                nodeString += ('-(:%s)-[]' % a)
+                if kth == 1:
+                    set_path_count(typeString, nodeString)
+                else:
+                    if a == 'U':
+                        nextType = 'BU'
+                    else:
+                        nextType = 'B'
+                    temp_type_a = typeString
+                    temp_node_a = nodeString
+                    for b in nextType:
+                        typeString = temp_type_a
+                        nodeString = temp_node_a
+                        typeString += (b,)
+                        nodeString += ('-(:%s)-[]' % b)
+                        temp_type_b = typeString
+                        temp_node_b = nodeString
+                        if kth != 4:
+                            if b == 'B':
+                                nextType = Type
+                            else:
+                                nextType = 'U'
+                        else:
+                            if b == 'B':
+                                nextType = 'U'
+                            else:
+                                nextType = 'BU'
+                        for c in nextType:
+                            typeString = temp_type_b
+                            nodeString = temp_node_b
+                            typeString += (c,)
+                            nodeString += ('-(:%s)-[]' % c)
+                            if kth == 3:
+                                set_path_count(typeString, nodeString)
+                            else:
+                                if kth == 4:
+                                    if c == 'U':
+                                        nextType = 'U'
+                                    else:
+                                        nextType = Type
+                                else:
+                                    if c == 'U':
+                                        nextType = 'UB'
+                                    else:
+                                        nextType = 'U'
+                                temp_node_c = nodeString
+                                temp_type_c = typeString
+                                for d in nextType:
+                                    typeString = temp_type_c
+                                    nodeString = temp_node_c
+                                    typeString += (d,)
+                                    nodeString += ('-(:%s)-[]' % d)
+                                    if kth == 4:
+                                        set_path_count(typeString, nodeString)
+                                    else:
+                                        if d == 'U':
+                                            nextType = 'UB'
+                                        else:
+                                            nextType = Type
+                                        temp_node_d = nodeString
+                                        temp_type_d = typeString
+                                        for e in nextType:
+                                            typeString = temp_type_d
+                                            nodeString = temp_node_d
+                                            typeString += (e,)
+                                            nodeString += ('-(:%s)-[]' % e)
+                                            set_path_count(typeString, nodeString)
 
-    print(meta_graph)
     return meta_graph
 
 # get_meta_graph_count("YPavuOh2XsnRbLfl0DH2lQ","j8EHmuebLe8avjeFqrL0eg", 2)
