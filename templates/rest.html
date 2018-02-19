@@ -56,32 +56,15 @@
                <a class="navbar-brand" href="se.html">iPDA Yelp Demo</a>
             </div>
             <!-- /.navbar-header -->
-            <div class="navbar-default sidebar" role="navigation">
-               <div class="sidebar-nav navbar-collapse">
-                  <ul class="nav" id="side-menu">
-                     <li>
-                        <a href="index.html">Search</a>
-                     </li>
-                     <li>
-                        <a href="index.html">Others</a>
-                     </li>
-                  </ul>
-               </div>
-               <!-- /.sidebar-collapse -->
-            </div>
-            <!-- /.navbar-static-side -->
          </nav>
          <div id="page-wrapper">
             <div class="row">
                <div class="col-lg-12">
-                  <h2>Basic Information</h2>
-                  <b>Business name:</b> {{ rest_info.name }}<br> 
+		          <h3><a href="/{{ rest_info.business_id}}/">{{ rest_info.name }}</a></h3> 
                   <b>Stars:</b> {{ rest_info.stars }}<br>
                   <b>Address:</b> {{ rest_info.address }}, {{ rest_info.city }}<br>
-                  <b>Categories:</b> <input type="text" value="{{ rest_info.categories|join:', '}}" data-role="tagsinput" class="form-control" />
-                  <b>Keywords:</b> <input type="text" value="{{ rest_info.keywords|join:', '}}" data-role="tagsinput" class="form-control" />
-                  <br>
-                  <b>Latitude: </b> {{ rest_info.latitude }}, <b>Longitude: </b>{{ rest_info.longitude }}<br>
+                  <b>Categories:</b> {{ rest_info.categories|join:', '}}<br>
+                  <b>Keywords:</b> {{ rest_info.keywords|join:', '}}<br>
 
 		  <!-- Google Maps starts -->
 		  <!--

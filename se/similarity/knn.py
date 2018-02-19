@@ -27,8 +27,20 @@ def get_knn(type_, id_, k=10, approach='hin2vec'):
         return []
 
     v = rest['v']
+    hin2vec_path_dim = [2, 15, 24, 31, 46, 52, 58, 68, 78, 85,
+                        87, 92, 93, 98, 122, 125]
+#   hin2vec_path_dim = []
+    if approach == 'hin2vec':
+        for i in hin2vec_path_dim:
+            v[i] = 0
     for business in vector_coll.find({'type': settings.BUSINESS_COLL}):
+        if business['id'] == id_:
+            continue
+
         v2 = business['v']
+        if approach == 'hin2vec':
+            for i in hin2vec_path_dim:
+                v2[i] = 0
         if type_ == 'euclidean':
             distance = by_euclidean_distance(v, v2)
         if type_ == 'manhattan':
@@ -42,10 +54,9 @@ def get_knn(type_, id_, k=10, approach='hin2vec'):
         distances.append((distance, business['id']))
 
     if type_ in ['inner', 'sigmoid', 'cosine']:
-        results = sorted(distances, reverse=True)[1:k + 1]
-        print results
+        results = sorted(distances, reverse=True)[:k]
         return results
-    return sorted(distances)[1:k + 1]
+    return sorted(distances)[:k]
 
 
 #TODO refector and speed up

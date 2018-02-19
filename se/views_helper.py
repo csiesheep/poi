@@ -11,4 +11,6 @@ __author__ = 'sheep'
 def get_keywords(bid):
     coll = mongodb_helper.get_coll(settings.BUSINESS_KEYWORD_COLL)
     data = coll.find_one({'id': bid})
+    if data is None:
+        return []
     return [w['word'] for w in data['keywords']]
